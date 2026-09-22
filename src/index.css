@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Courier New", Courier, monospace;
+  --font-sans: "Courier New", Courier, monospace;
+  --font-mono: "Courier New", Courier, monospace;
 
-  --color-void: #0d0d0d;
-  --color-panel: #141414;
-  --color-panel-raised: #1a1a1a;
-  --color-ink: #F4F1EA;
-  --color-ink-dim: #a8a49a;
-  --color-signal: #9333EA;
-  --color-signal-soft: #C084FC;
-  --color-hairline: rgba(244, 241, 234, 0.1);
+  --color-void: #000000;
+  --color-panel: #0a0a0a;
+  --color-panel-raised: #141414;
+  --color-ink: #ffffff;
+  --color-ink-dim: #a3a3a3;
+  --color-signal: #ccff00;
+  --color-signal-soft: rgba(204, 255, 0, 0.1);
+  --color-hairline: rgba(255, 255, 255, 0.2);
 }
 
 @layer base {
   * {
     border-color: var(--color-hairline);
+    border-radius: 0px !important;
   }
   html {
     background: var(--color-void);
@@ -26,31 +27,7 @@
   body {
     background: var(--color-void);
     color: var(--color-ink);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-  }
-  ::selection {
-    background: var(--color-signal);
-    color: var(--color-ink);
-  }
-  :focus-visible {
-    outline: 2px solid var(--color-signal-soft);
-    outline-offset: 2px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-}
-
-@layer utilities {
-  .font-display { font-family: var(--font-display); }
-  .font-mono-label {
     font-family: var(--font-mono);
-    letter-spacing: 0.08em;
+    -webkit-font-smoothing: antialiased;
   }
 }
