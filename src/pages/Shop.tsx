@@ -8,30 +8,34 @@ export function Shop() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-16">
-      
-      <h1 className="mt-2 font-display text-4xl uppercase text-ink">Active Artifacts</h1>
-
-      <div className="mt-8 flex flex-wrap gap-3">
-        <button
-          onClick={() => setActive(null)}
-          className={`font-mono-label rounded-full border px-4 py-2 text-[11px] uppercase transition-colors ${
-            active === null
-              ? 'border-signal bg-signal text-ink'
-              : 'border-ink/20 text-ink-dim hover:text-ink'
-          }`}
-        >
-          All
-        </button>
-        {categories.map((c) => (
+   <h1 className="mt-2 font-mono text-4xl uppercase text-ink">
+          Active Artifacts, Made to Order.
+        </h1>
+        <div className="mt-8 flex flex-wrap gap-3">
           <button
-            key={c}
-            onClick={() => setActive(c)}
-            className={`font-mono-label rounded-full border px-4 py-2 text-[11px] uppercase transition-colors ${
-              active === c
-                ? 'border-signal bg-signal text-ink'
-                : 'border-ink/20 text-ink-dim hover:text-ink'
+            onClick={() => setActive(null)}
+            className={`font-mono border px-4 py-2 uppercase ${
+              active === null
+                ? 'border-signal bg-signal text-void font-bold'
+                : 'border-hairline text-ink-dim hover:text-ink hover:border-ink'
             }`}
           >
+            All
+          </button>
+          {categories.map((c) => (
+            <button
+              key={c}
+              onClick={() => setActive(c)}
+              className={`font-mono border px-4 py-2 uppercase ${
+                active === c
+                  ? 'border-signal bg-signal text-void font-bold'
+                  : 'border-hairline text-ink-dim hover:text-ink hover:border-ink'
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
             {c}
           </button>
         ))}
