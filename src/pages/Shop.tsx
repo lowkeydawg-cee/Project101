@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Eyebrow } from '@/components/Eyebrow'
 import { ProductCard } from '@/components/ProductCard'
 import { products, categories } from '@/data/products'
 
