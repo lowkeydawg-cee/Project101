@@ -1,37 +1,22 @@
-import { Switch, Route } from 'wouter'
-import { NavBar } from '@/components/NavBar'
-import { Footer } from '@/components/Footer'
-import { Home } from '@/pages/Home'
-import { Shop } from '@/pages/Shop'
-import { ProductDetail } from '@/pages/ProductDetail'
-import { Cart } from '@/pages/Cart'
-import { CustomQuote } from '@/pages/CustomQuote'
-import { About } from '@/pages/About'
-import { Contact } from '@/pages/Contact'
-import { NotFound } from '@/pages/NotFound'
-import { CartProvider } from '@/context/CartContext'
+import { CartProvider } from '@/context/CartContext';
+import { CartDrawer } from '@/components/CartDrawer';
+import { Footer } from '@/components/Footer';
+import { NavBar } from '@/components/NavBar';
+import Shop from '@/pages/Shop';
 
-function App() {
+export function App() {
   return (
     <CartProvider>
-      <div className="flex min-h-screen flex-col bg-void text-ink">
+      <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
         <NavBar />
         <main className="flex-1">
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/shop" component={Shop} />
-            <Route path="/shop/:slug" component={ProductDetail} />
-            <Route path="/cart" component={Cart} />
-            <Route path="/custom" component={CustomQuote} />
-            <Route path="/about" component={About} />
-            <Route path="/contact" component={Contact} />
-            <Route component={NotFound} />
-          </Switch>
+          <Shop />
         </main>
         <Footer />
+        <CartDrawer />
       </div>
     </CartProvider>
-  )
+  );
 }
 
-export default App
+export default App;
