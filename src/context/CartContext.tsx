@@ -14,13 +14,15 @@ interface CartContextValue {
   clear: () => void
   subtotal: number
   itemCount: number
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([])
-
+  const [isOpen, setIsOpen] = useState(false)
   const addItem = (product: Product, quantity = 1) => {
     setLines((prev) => {
       const existing = prev.find((l) => l.product.id === product.id)
@@ -55,7 +57,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ lines, addItem, removeItem, setQuantity, clear, subtotal, itemCount }}
+      value={{
+        lines,
+        addItem,
+        removeItem,
+        setQuantity,
+        clear,
+        subtotal,
+        itemCount,
+        isOpen,
+        setIsOpen,
+      }}
     >
       {children}
     </CartContext.Provider>

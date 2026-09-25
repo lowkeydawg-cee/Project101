@@ -1,33 +1,61 @@
 @import "tailwindcss";
 
-@theme {
-  --font-display: "Courier New", Courier, monospace;
-  --font-sans: "Courier New", Courier, monospace;
-  --font-mono: "Courier New", Courier, monospace;
+:root {
+  --font-display: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
 
-  --color-void: #000000;
-  --color-panel: #0a0a0a;
-  --color-panel-raised: #141414;
-  --color-ink: #ffffff;
-  --color-ink-dim: #a3a3a3;
-  --color-signal: #ccff00;
-  --color-signal-soft: rgba(204, 255, 0, 0.1);
-  --color-hairline: rgba(255, 255, 255, 0.2);
+  --void: #f5f4ef;
+  --panel: #eceae3;
+  --panel-raised: #ffffff;
+  --ink: #171714;
+  --ink-dim: #66645e;
+  --signal: #59651f;
+  --signal-soft: rgba(89, 101, 31, 0.10);
+  --hairline: rgba(23, 23, 20, 0.14);
+}
+
+.dark,
+html.dark {
+  --void: #0b0b0a;
+  --panel: #111110;
+  --panel-raised: #181816;
+  --ink: #f2f0e9;
+  --ink-dim: #aaa79f;
+  --signal: #d7e83f;
+  --signal-soft: rgba(215, 232, 63, 0.10);
+  --hairline: rgba(242, 240, 233, 0.16);
 }
 
 @layer base {
   * {
     border-color: var(--color-hairline);
-    border-radius: 0px !important;
   }
+
   html {
     background: var(--color-void);
+    color-scheme: light;
+  }
+
+  html.dark {
     color-scheme: dark;
   }
+
   body {
+    margin: 0;
     background: var(--color-void);
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 220ms ease, color 220ms ease;
+  }
+
+  button,
+  a {
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease,
+      opacity 150ms ease;
   }
 }

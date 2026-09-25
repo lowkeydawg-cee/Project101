@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'wouter'
 import { Menu, X, ShoppingBag } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const links = [
   { href: '/shop', label: 'Storefront' },
@@ -15,7 +16,7 @@ export function NavBar() {
   const { itemCount } = useCart()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-hairline bg-void/90 backdrop-blur">
+    <><header className="sticky top-0 z-40 border-b border-hairline bg-void/90 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <Link
           href="/"
@@ -35,6 +36,7 @@ export function NavBar() {
               {l.label}
             </Link>
           ))}
+          <ThemeToggle />
           <Link
             href="/cart"
             className="relative flex items-center gap-2 font-mono-label text-xs uppercase text-ink-dim transition-colors hover:text-ink"
@@ -49,14 +51,17 @@ export function NavBar() {
           </Link>
         </div>
 
-        <button
-          className="text-ink md:hidden"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-3 md:hidden">
+          <ThemeToggle />
+          <button
+            className="text-ink"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-label={open ? 'Close menu' : 'Open menu'}
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </nav>
 
       {open && (
@@ -72,16 +77,18 @@ export function NavBar() {
                 {l.label}
               </Link>
             ))}
-            <Link
-              href="/cart"
-              onClick={() => setOpen(false)}
-              className="font-mono-label text-sm uppercase text-ink-dim hover:text-ink"
-            >
-              Cart {itemCount > 0 ? `(${itemCount})` : ''}
-            </Link>
+            <div className="flex items-center justify-between gap-4">
+              <Link
+                href="/cart"
+                onClick={() => setOpen(false)}
+                className="font-mono-label text-sm uppercase text-ink-dim hover:text-ink"
+              >
+                Cart {itemCount > 0 ? `(${itemCount})` : ''}
+              </Link>
+            </div>
           </div>
         </div>
       )}
-    </header>
+    </header></>
   )
 }
