@@ -14,8 +14,8 @@ export function Footer() {
         <div>
           <p className="font-mono-label text-[11px] uppercase text-ink-dim">Navigate</p>
           <ul className="mt-3 space-y-2 text-sm">
-            <li><Link href="/shop" className="text-ink hover:text-signal-soft">Storefront</Link></li>
-            <li><Link href="/custom" className="text-ink hover:text-signal-soft">Custom Quote</Link></li>
+            <li><Link href="/shop" className="text-ink hover:text-signal-soft">Shop</Link></li>
+            <li><Link href="/custom" className="text-ink hover:text-signal-soft">Custom Orders</Link></li>
             <li><Link href="/about" className="text-ink hover:text-signal-soft">About</Link></li>
           </ul>
         </div>
@@ -23,7 +23,7 @@ export function Footer() {
         <div>
           <p className="font-mono-label text-[11px] uppercase text-ink-dim">Contact</p>
           <ul className="mt-3 space-y-2 text-sm text-ink-dim">
-            <li>hello@safehouse.rw <span className="text-[10px]">(placeholder)</span></li>
+            <li>hello@safehouse.rw</li>
             <li>Kigali, Rwanda</li>
           </ul>
         </div>
@@ -31,8 +31,8 @@ export function Footer() {
         <div>
           <p className="font-mono-label text-[11px] uppercase text-ink-dim">Elsewhere</p>
           <ul className="mt-3 space-y-2 text-sm text-ink-dim">
-            <li>Instagram <span className="text-[10px]">(placeholder)</span></li>
-            <li>WhatsApp <span className="text-[10px]">(placeholder)</span></li>
+            <li>Instagram</li>
+            <li>WhatsApp</li>
           </ul>
         </div>
       </div>

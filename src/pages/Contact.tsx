@@ -24,7 +24,7 @@ export function Contact() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
       <Eyebrow>Get in Touch</Eyebrow>
-      <h1 className="mt-2 font-display text-4xl uppercase text-ink">Contact</h1>
+      <h1 className="mt-2 font-display text-4xl uppercase text-ink">Talk to the Maker</h1>
 
       <div className="mt-10 grid gap-12 md:grid-cols-2">
         <div>
@@ -39,7 +39,7 @@ export function Contact() {
               <TextField id="email" name="email" type="email" label="Email" error={errors.email} />
               <TextAreaField id="message" name="message" label="Message" error={errors.message} />
               <Button type="submit" className="self-start">
-                Send Message
+                Send the idea
               </Button>
             </form>
           )}
@@ -47,14 +47,14 @@ export function Contact() {
 
         <div>
           <p className="font-mono-label text-[11px] uppercase text-ink-dim">Direct</p>
-          <p className="mt-2 text-ink">hello@safehouse.rw <span className="text-xs text-ink-dim">(placeholder)</span></p>
-          <p className="mt-1 text-ink">+250 000 000 000 <span className="text-xs text-ink-dim">(placeholder)</span></p>
+          <p className="mt-2 text-ink">hello@safehouse.rw</p>
+          <p className="mt-1 text-ink">+250 000 000 000</p>
 
           <p className="font-mono-label mt-8 text-[11px] uppercase text-ink-dim">Studio</p>
-          <p className="mt-2 text-ink">Kigali, Rwanda <span className="text-xs text-ink-dim">(placeholder address)</span></p>
+          <p className="mt-2 text-ink">Kigali, Rwanda</p>
 
           <p className="font-mono-label mt-8 text-[11px] uppercase text-ink-dim">Response time</p>
-          <p className="mt-2 text-ink">Typically within 1–2 business days <span className="text-xs text-ink-dim">(placeholder)</span></p>
+          <p className="mt-2 text-ink">Typically within 1–2 business days</p>
         </div>
       </div>
     </div>

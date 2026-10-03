@@ -1,9 +1,18 @@
-import { useState } from 'react'
-import { products } from '../data/products'
+import { useState, useEffect } from 'react'
+import { getProducts, type Product } from '../data/products'
 import { ProductCard } from '../components/ProductCard'
 
 export function Shop() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [active, setActive] = useState<string | null>(null)
+
+  useEffect(() => {
+    getProducts().then((data) => {
+      setProducts(data)
+      setLoading(false)
+    })
+  }, [])
 
   const categories = Array.from(
     new Set(products.map((product) => product.category))
@@ -22,6 +31,14 @@ export function Shop() {
     }
 
     return `${base} border-hairline bg-transparent text-ink-dim hover:border-ink hover:bg-ink/5 hover:text-ink active:scale-95`
+  }
+
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-7xl px-4 py-20 text-center">
+        <p className="font-mono text-xs uppercase text-ink-dim">Loading artifacts...</p>
+      </main>
+    )
   }
 
   return (
@@ -98,7 +115,7 @@ export function Shop() {
                 animationDelay: `${Math.min(index * 50, 300)}ms`,
               }}
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} index={index} />
             </div>
           ))}
         </div>

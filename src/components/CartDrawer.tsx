@@ -21,9 +21,9 @@ export function CartDrawer() {
         onClick={() => setIsOpen(false)}
       />
 
-      <aside className="relative z-10 flex h-full w-full max-w-md flex-col justify-between border-l border-neutral-800 bg-neutral-950 p-6 text-neutral-100">
+      <aside className="relative z-10 flex h-full w-full max-w-md flex-col justify-between border-l border-hairline bg-void p-6 text-ink">
         <div>
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+          <div className="flex items-center justify-between border-b border-hairline pb-4">
             <h2 className="text-xl font-mono uppercase tracking-wider">
               Your Cart
             </h2>
@@ -31,7 +31,7 @@ export function CartDrawer() {
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="text-sm font-mono text-neutral-400 transition-colors hover:text-white"
+              className="text-sm font-mono text-ink-dim transition-colors hover:text-ink"
             >
               [CLOSE]
             </button>
@@ -39,27 +39,27 @@ export function CartDrawer() {
 
           <div className="mt-6 max-h-[60vh] space-y-4 overflow-y-auto pr-2">
             {lines.length === 0 ? (
-              <p className="py-8 text-center text-sm font-mono text-neutral-500">
+              <p className="py-8 text-center text-sm font-mono text-ink-dim">
                 Your cart is empty.
               </p>
             ) : (
               lines.map((line) => (
                 <div
                   key={line.product.id}
-                  className="flex items-center justify-between border border-neutral-800 bg-neutral-900/50 p-4"
+                  className="flex items-center justify-between border border-hairline bg-panel p-4"
                 >
                   <div className="min-w-0">
                     <h4 className="truncate text-sm font-mono uppercase">
                       {line.product.name}
                     </h4>
 
-                    <p className="mt-1 text-xs text-neutral-400">
+                    <p className="mt-1 text-xs text-ink-dim">
                       RWF {line.product.price.toLocaleString()} each
                     </p>
                   </div>
 
                   <div className="ml-4 flex shrink-0 items-center space-x-3">
-                    <div className="flex items-center border border-neutral-700">
+                    <div className="flex items-center border border-hairline">
                       <button
                         type="button"
                         onClick={() =>
@@ -68,7 +68,7 @@ export function CartDrawer() {
                             line.quantity - 1
                           )
                         }
-                        className="px-2 py-1 text-xs transition-colors hover:bg-neutral-800"
+                        className="px-2 py-1 text-xs transition-colors hover:bg-ink hover:text-panel"
                       >
                         -
                       </button>
@@ -85,7 +85,7 @@ export function CartDrawer() {
                             line.quantity + 1
                           )
                         }
-                        className="px-2 py-1 text-xs transition-colors hover:bg-neutral-800"
+                        className="px-2 py-1 text-xs transition-colors hover:bg-ink hover:text-panel"
                       >
                         +
                       </button>
@@ -94,7 +94,7 @@ export function CartDrawer() {
                     <button
                       type="button"
                       onClick={() => removeItem(line.product.id)}
-                      className="text-xs font-mono text-red-400 transition-colors hover:text-red-300"
+                      className="text-xs font-mono text-red-500 transition-colors hover:text-red-400"
                     >
                       [REMOVE]
                     </button>
@@ -105,7 +105,7 @@ export function CartDrawer() {
           </div>
         </div>
 
-        <div className="mt-4 border-t border-neutral-800 pt-4">
+        <div className="mt-4 border-t border-hairline pt-4">
           <div className="mb-4 flex items-center justify-between text-sm font-mono">
             <span>TOTAL:</span>
 
@@ -117,7 +117,7 @@ export function CartDrawer() {
           <button
             type="button"
             disabled={lines.length === 0}
-            className="w-full bg-white py-3 font-mono font-bold uppercase text-black transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full bg-ink py-3 font-mono font-bold uppercase text-void transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => alert('Checkout flow triggered!')}
           >
             Proceed to Checkout

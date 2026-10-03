@@ -9,11 +9,15 @@ export interface Product {
   material: string
   finish: string
   image: string
+  imageUrl?: string
+  featured?: boolean
+  available?: boolean
+  stock?: number
 }
-
 // Placeholder gradient "photography" — swap for real product photography later.
-const shade = (hue: number) =>
-  `linear-gradient(160deg, hsl(${hue} 30% 10%) 0%, hsl(${hue} 40% 5%) 60%, #0d0d0d 100%)`
+function shade(hue: number) {
+  return `linear-gradient(160deg, hsl(${hue} 30% 10%) 0%, hsl(${hue} 40% 5%) 60%, #0d0d0d 100%)`
+}
 
 export const products: Product[] = [
   {
@@ -28,6 +32,9 @@ export const products: Product[] = [
     material: 'PETG, matte finish',
     finish: 'Charcoal',
     image: shade(265),
+    featured: true,
+    available: true,
+    stock: 4,
   },
   {
     id: '2',
@@ -41,6 +48,9 @@ export const products: Product[] = [
     material: 'PLA, translucent',
     finish: 'Bone',
     image: shade(280),
+    featured: true,
+    available: true,
+    stock: 3,
   },
   {
     id: '3',
@@ -54,6 +64,9 @@ export const products: Product[] = [
     material: 'PLA, silk finish',
     finish: 'Ink Black',
     image: shade(250),
+    featured: false,
+    available: true,
+    stock: 4,
   },
   {
     id: '4',
@@ -67,6 +80,9 @@ export const products: Product[] = [
     material: 'PETG',
     finish: 'Graphite',
     image: shade(300),
+    featured: false,
+    available: true,
+    stock: 30,
   },
   {
     id: '5',
@@ -80,6 +96,9 @@ export const products: Product[] = [
     material: 'PLA + sand infill',
     finish: 'Charcoal',
     image: shade(240),
+    featured: false,
+    available: true,
+    stock: 20,
   },
   {
     id: '6',
@@ -93,6 +112,9 @@ export const products: Product[] = [
     material: 'PETG, translucent',
     finish: 'Smoke',
     image: shade(275),
+    featured: true,
+    available: true,
+    stock: 6,
   },
   {
     id: '7',
@@ -106,6 +128,9 @@ export const products: Product[] = [
     material: 'PETG',
     finish: 'Bone',
     image: shade(255),
+    featured: false,
+    available: true,
+    stock: 18,
   },
   {
     id: '8',
@@ -119,7 +144,65 @@ export const products: Product[] = [
     material: 'PLA, matte finish',
     finish: 'Ink Black / Bone',
     image: shade(285),
+    featured: false,
+    available: true,
+    stock: 9,
   },
 ]
 
 export const categories = Array.from(new Set(products.map((p) => p.category)))
+import { supabase } from '@/lib/supabase'
+
+export interface Product {
+  id: string
+  slug: string
+  catalogNo: string
+  name: string
+  category: string
+  price: number
+  description: string
+  material: string
+  finish: string
+  image: string
+}
+
+// Maps a raw Supabase row (snake_case) to the app's Product shape (camelCase)
+function mapRow(row: any): Product {
+  return {
+    id: row.id,
+    slug: row.slug,
+    catalogNo: row.catalog_no,
+    name: row.name,
+    category: row.category,
+    price: row.price,
+    description: row.description,
+    material: row.material,
+    finish: row.finish,
+    image: row.image_url ?? '',
+  }
+}
+
+export async function getProducts(): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Failed to fetch products:', error.message)
+    return []
+  }
+
+  return (data ?? []).map(mapRow)
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (error || !data) return null
+  return mapRow(data)
+}

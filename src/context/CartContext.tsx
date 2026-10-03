@@ -1,4 +1,10 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import type { Product } from '@/data/products'
 
 export interface CartLine {
@@ -20,40 +26,112 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null)
 
+const STORAGE_KEY = 'safehouse-cart'
+
+function readStoredCart(): CartLine[] {
+  try {
+    const stored = sessionStorage.getItem(STORAGE_KEY)
+
+    if (!stored) return []
+
+    const parsed = JSON.parse(stored)
+
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [lines, setLines] = useState<CartLine[]>([])
+  const [lines, setLines] = useState<CartLine[]>(() => readStoredCart())
   const [isOpen, setIsOpen] = useState(false)
+
+  function updateLines(
+    updater: (current: CartLine[]) => CartLine[],
+  ) {
+    setLines((current) => {
+      const next = updater(current)
+
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      } catch {
+        // Ignore storage errors.
+      }
+
+      return next
+    })
+  }
+
   const addItem = (product: Product, quantity = 1) => {
-    setLines((prev) => {
-      const existing = prev.find((l) => l.product.id === product.id)
+    updateLines((current) => {
+      const existing = current.find(
+        (line) => line.product.id === product.id,
+      )
+
       if (existing) {
-        return prev.map((l) =>
-          l.product.id === product.id ? { ...l, quantity: l.quantity + quantity } : l
+        return current.map((line) =>
+          line.product.id === product.id
+            ? {
+                ...line,
+                quantity: line.quantity + quantity,
+              }
+            : line,
         )
       }
-      return [...prev, { product, quantity }]
+
+      return [...current, { product, quantity }]
     })
   }
 
   const removeItem = (productId: string) => {
-    setLines((prev) => prev.filter((l) => l.product.id !== productId))
-  }
-
-  const setQuantity = (productId: string, quantity: number) => {
-    setLines((prev) =>
-      prev
-        .map((l) => (l.product.id === productId ? { ...l, quantity } : l))
-        .filter((l) => l.quantity > 0)
+    updateLines((current) =>
+      current.filter((line) => line.product.id !== productId),
     )
   }
 
-  const clear = () => setLines([])
+  const setQuantity = (
+    productId: string,
+    quantity: number,
+  ) => {
+    updateLines((current) =>
+      current
+        .map((line) =>
+          line.product.id === productId
+            ? { ...line, quantity }
+            : line,
+        )
+        .filter((line) => line.quantity > 0),
+    )
+  }
+
+  const clear = () => {
+    setLines([])
+
+    try {
+      sessionStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Ignore storage errors.
+    }
+  }
 
   const subtotal = useMemo(
-    () => lines.reduce((sum, l) => sum + l.product.price * l.quantity, 0),
-    [lines]
+    () =>
+      lines.reduce(
+        (sum, line) =>
+          sum + line.product.price * line.quantity,
+        0,
+      ),
+    [lines],
   )
-  const itemCount = useMemo(() => lines.reduce((sum, l) => sum + l.quantity, 0), [lines])
+
+  const itemCount = useMemo(
+    () =>
+      lines.reduce(
+        (sum, line) => sum + line.quantity,
+        0,
+      ),
+    [lines],
+  )
 
   return (
     <CartContext.Provider
@@ -76,6 +154,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const ctx = useContext(CartContext)
-  if (!ctx) throw new Error('useCart must be used within CartProvider')
+
+  if (!ctx) {
+    throw new Error(
+      'useCart must be used within CartProvider',
+    )
+  }
+
   return ctx
 }

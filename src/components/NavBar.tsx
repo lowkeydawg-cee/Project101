@@ -6,11 +6,11 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 
 const links = [
   { href: '/shop', label: 'Storefront' },
-  { href: '/custom', label: 'Custom Quote' },
+  { href: '/custom-quote', label: 'Custom Quote' },
+  { href: '/order-status', label: 'Order Status' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
-
 export function NavBar() {
   const [open, setOpen] = useState(false)
   const { itemCount } = useCart()

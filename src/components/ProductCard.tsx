@@ -2,119 +2,133 @@ import { Link } from 'wouter'
 import type { Product } from '@/data/products'
 import { formatRWF } from '@/lib/format'
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, index }: { product: Product; index: number }) {
+  const hasImage = Boolean(product.image) && product.image.startsWith('http')
+
   return (
     <Link
       href={`/shop/${product.slug}`}
       className="group block"
     >
-      {/* Product image */}
+      {/* Object */}
       <div
         className="
-          relative aspect-[4/3]
+          relative
+          aspect-[4/3]
           overflow-hidden
-          bg-ink/5
-          transition-transform
-          duration-300
-          ease-out
-          group-hover:-translate-y-0.5
+          border
+          border-black/80
+          bg-[#f1f0ec]
         "
-        style={{ background: product.image }}
-        aria-hidden="true"
       >
-        {/* Image surface */}
+        {hasImage ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="
+              h-full
+              w-full
+              object-cover
+              transition-transform
+              duration-700
+              ease-[cubic-bezier(0.22,1,0.36,1)]
+              group-hover:scale-[1.035]
+            "
+          />
+        ) : (
+          <div
+            className="
+              absolute
+              inset-0
+              transition-transform
+              duration-700
+              ease-[cubic-bezier(0.22,1,0.36,1)]
+              group-hover:scale-[1.035]
+            "
+            style={{ background: product.image }}
+          />
+        )}
+
+        {/* Object number */}
         <div
           className="
-            absolute inset-0
-            transition-transform
-            duration-500
-            ease-out
-            group-hover:scale-[1.025]
-          "
-          style={{ background: product.image }}
-        />
-
-        {/* Small product index */}
-        <span
-          className="
             absolute
-            left-3
-            top-3
+            left-4
+            top-4
             font-mono
             text-[9px]
             uppercase
-            tracking-[0.18em]
-            text-ink-dim
-            opacity-70
+            tracking-[0.16em]
+            text-black
           "
         >
           {product.category}
-        </span>
+        </div>
 
         {/* View indicator */}
-        <span
+        <div
           className="
             absolute
-            bottom-3
-            right-3
+            bottom-4
+            right-4
             flex
-            h-8
-            w-8
+            h-9
+            w-9
             items-center
             justify-center
-            rounded-full
-            bg-void/80
-            text-xs
-            text-ink
-            opacity-0
-            backdrop-blur-sm
+            border
+            border-black
+            bg-[#f1f0ec]/90
+            font-mono
+            text-sm
+            text-black
             transition-all
             duration-300
-            group-hover:opacity-100
+            group-hover:bg-black
+            group-hover:text-white
           "
         >
           ↗
-        </span>
+        </div>
       </div>
 
       {/* Product information */}
-      <div className="pt-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p
-              className="
-                font-mono
-                text-[9px]
-                uppercase
-                tracking-[0.16em]
-                text-ink-dim
-              "
-            >
-              {product.category}
-            </p>
-
+      <div className="mt-4">
+        <div className="flex items-start justify-between gap-6">
+          <div>
             <h3
               className="
-                mt-1
-                font-display
-                text-lg
+                font-mono
+                text-[15px]
+                uppercase
                 leading-tight
+                tracking-[-0.02em]
                 text-ink
-                transition-opacity
-                duration-200
-                group-hover:opacity-70
               "
             >
               {product.name}
             </h3>
+
+            <p
+              className="
+                mt-2
+                font-mono
+                text-[9px]
+                uppercase
+                tracking-[0.14em]
+                text-ink-dim
+              "
+            >
+              Made to order
+            </p>
           </div>
 
           <span
             className="
               shrink-0
-              pt-1
               font-mono
-              text-xs
+              text-[13px]
+              tracking-[-0.02em]
               text-ink
             "
           >
@@ -122,7 +136,7 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         </div>
 
-        {/* Bottom metadata */}
+        {/* Technical line */}
         <div
           className="
             mt-4
@@ -130,35 +144,32 @@ export function ProductCard({ product }: { product: Product }) {
             items-center
             justify-between
             border-t
-            border-hairline
-            pt-3
+            border-black/20
+            pt-2
           "
         >
           <span
             className="
               font-mono
-              text-[9px]
+              text-[8px]
               uppercase
-              tracking-[0.14em]
+              tracking-[0.16em]
               text-ink-dim
             "
           >
-            Made to order
+           OBJECT / {String(index + 1).padStart(3, '0')}
           </span>
 
           <span
             className="
               font-mono
-              text-[9px]
+              text-[8px]
               uppercase
-              tracking-[0.14em]
+              tracking-[0.16em]
               text-ink-dim
-              transition-colors
-              duration-200
-              group-hover:text-ink
             "
           >
-            View piece →
+             SEE WHAT'S ON THE SHELF →
           </span>
         </div>
       </div>
