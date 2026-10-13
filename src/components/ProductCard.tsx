@@ -1,9 +1,31 @@
+import { useRef } from 'react'
 import { Link } from 'wouter'
 import type { Product } from '@/data/products'
 import { formatRWF } from '@/lib/format'
 
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
 export function ProductCard({ product, index }: { product: Product; index: number }) {
   const hasImage = Boolean(product.image) && product.image.startsWith('http')
+  const frameRef = useRef<HTMLDivElement>(null)
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (prefersReducedMotion()) return
+    const el = frameRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    el.style.transform = `perspective(800px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg)`
+  }
+
+  function handlePointerLeave() {
+    const el = frameRef.current
+    if (!el) return
+    el.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)'
+  }
 
   return (
     <Link
@@ -12,6 +34,9 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
     >
       {/* Object */}
       <div
+        ref={frameRef}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
         className="
           relative
           aspect-[4/3]
@@ -19,6 +44,10 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           border
           border-black/80
           bg-[#f1f0ec]
+          transition-transform
+          duration-200
+          ease-out
+          [will-change:transform]
         "
       >
         {hasImage ? (
@@ -89,6 +118,31 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           "
         >
           ↗
+        </div>
+
+        {/* Technical overlay — real spec fields only, revealed on hover */}
+        <div
+          className="
+            absolute
+            inset-x-0
+            bottom-0
+            translate-y-full
+            bg-black/85
+            px-4
+            py-3
+            opacity-0
+            transition-all
+            duration-300
+            ease-out
+            group-hover:translate-y-0
+            group-hover:opacity-100
+          "
+        >
+          <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[8px] uppercase tracking-[0.14em] text-white/80">
+            <span>Material / {product.material}</span>
+            <span>Finish / {product.finish}</span>
+            <span>Category / {product.category}</span>
+          </div>
         </div>
       </div>
 

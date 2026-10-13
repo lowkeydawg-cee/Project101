@@ -44,7 +44,7 @@ export function NavBar() {
           >
             <ShoppingBag size={16} aria-hidden="true" />
             {itemCount > 0 && (
-              <span className="rounded-full bg-signal px-1.5 py-0.5 text-[10px] text-ink">
+              <span className="rounded-full bg-signal px-1.5 py-0.5 text-[10px] text-void">
                 {itemCount}
               </span>
             )}
