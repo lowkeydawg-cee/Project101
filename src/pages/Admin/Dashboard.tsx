@@ -409,10 +409,7 @@ function ProductForm({
     setSaving(true)
     setError('')
 
-    let image_url =
-      product?.imageUrl ??
-      product?.image ??
-      null
+    let image_url = product?.image || null
 
     if (file) {
       const fileName = `${Date.now()}-${file.name}`

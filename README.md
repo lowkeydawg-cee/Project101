@@ -1,32 +1,71 @@
-# React + TypeScript + Vite
+# The Safehouse
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Online storefront for **The Safehouse (Domus Tuta)** — a 3D printing studio in Kigali, Rwanda.
+Customers browse made-to-order printed objects, order online, request custom prints, and track their order; the owner manages products and orders from a private admin dashboard.
 
-Currently, two official plugins are available:
+**Live site:** https://project101-puce.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Shop** — product catalogue loaded live from Supabase, with category filters and product detail pages
+- **Cart & checkout** — pickup or delivery (flat 2,000 RWF), orders priced and saved on the server
+- **Order tracking** — customers follow their order with the order number (`/order-status?order=SH-XXXXXXXX`)
+- **Custom quote** — request form with STL file preview
+- **Admin** (`/admin`) — add/edit/delete products with photo upload, view orders and update their production status
+- **Order emails** — the shop and the customer each get an email when an order is placed (EmailJS)
+- Light / dark theme
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech stack
 
-## Expanding the Oxlint configuration
+| Layer | Tool |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, wouter |
+| Backend | Supabase (Postgres, Storage, Auth) |
+| Email | EmailJS |
+| Hosting | Vercel (auto-deploys from `main`) |
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Running locally
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+cp .env.example .env   # then fill in the values
+npm run dev            # http://localhost:5173
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Other scripts: `npm run build` (type-check + production build), `npm run lint`, `npm run preview`.
+
+## Environment variables
+
+Set these in `.env` locally **and** in Vercel → Project → Settings → Environment Variables. Only `VITE_`-prefixed variables reach the browser.
+
+| Variable | Required | Where to find it |
+|---|---|---|
+| `VITE_SUPABASE_URL` | yes | Supabase → Project Settings → API |
+| `VITE_SUPABASE_ANON_KEY` | yes | Supabase → Project Settings → API (anon / publishable key) |
+| `VITE_EMAILJS_SERVICE_ID` | for emails | EmailJS → Email Services |
+| `VITE_EMAILJS_PUBLIC_KEY` | for emails | EmailJS → Account → API keys |
+| `VITE_EMAILJS_ADMIN_TEMPLATE_ID` | for emails | EmailJS → Email Templates |
+| `VITE_EMAILJS_CUSTOMER_TEMPLATE_ID` | for emails | EmailJS → Email Templates |
+
+Never commit `.env`, and never put the Supabase **service role** key in a `VITE_` variable.
+
+## Database
+
+Supabase tables: `products`, `orders`, `order_items`, plus the `product-images` storage bucket.
+Order security (server-side pricing, private customer details, admin-only access) lives in [`supabase/orders-security.sql`](supabase/orders-security.sql) — run it once in the Supabase SQL Editor.
+
+## Project structure
+
+```
+src/
+  components/   shared UI (NavBar, Footer, ProductCard, CartDrawer, …)
+  context/      cart and admin-auth state
+  data/         Supabase product queries
+  lib/          Supabase client, formatting, order emails, motion helpers
+  pages/        routes (Home, Shop, ProductDetail, Cart, Checkout, OrderStatus, Admin, …)
+supabase/       SQL to run in the Supabase dashboard
+```
+
+## Deployment
+
+Every push to `main` deploys to production on Vercel. Check build status under the project's **Deployments** tab.

@@ -1,3 +1,4 @@
+import { Link } from 'wouter'
 import { useCart } from '@/context/CartContext'
 
 export function CartDrawer() {
@@ -114,14 +115,23 @@ export function CartDrawer() {
             </span>
           </div>
 
-          <button
-            type="button"
-            disabled={lines.length === 0}
-            className="w-full bg-ink py-3 font-mono font-bold uppercase text-void transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => alert('Checkout flow triggered!')}
-          >
-            Proceed to Checkout
-          </button>
+          {lines.length === 0 ? (
+            <button
+              type="button"
+              disabled
+              className="w-full cursor-not-allowed bg-ink py-3 font-mono font-bold uppercase text-void opacity-50"
+            >
+              Proceed to Checkout
+            </button>
+          ) : (
+            <Link
+              href="/checkout"
+              onClick={() => setIsOpen(false)}
+              className="block w-full bg-ink py-3 text-center font-mono font-bold uppercase text-void transition-colors hover:opacity-90"
+            >
+              Proceed to Checkout
+            </Link>
+          )}
         </div>
       </aside>
     </div>

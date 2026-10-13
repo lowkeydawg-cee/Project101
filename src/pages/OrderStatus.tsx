@@ -36,15 +36,13 @@ export function OrderStatus() {
         return
       }
 
+      // Looks up one order by number and returns only status fields —
+      // customer details stay private (see supabase/orders-security.sql).
       const { data, error } = await supabase
-        .from('orders')
-        .select(
-          'order_number, status, estimated_ready, location, delivery_method',
-        )
-        .eq('order_number', orderNumber)
-        .single()
+        .rpc('get_order_status', { p_order_number: orderNumber })
+        .maybeSingle()
 
-      if (error) {
+      if (error || !data) {
         setError('Order not found.')
         setLoading(false)
         return

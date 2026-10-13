@@ -3,9 +3,14 @@ import { useLocation } from 'wouter'
 import { useCart } from '@/context/CartContext'
 import { supabase } from '@/lib/supabase'
 import { formatRWF } from '@/lib/format'
+import { sendOrderEmails, type OrderEmail } from '@/lib/notify'
 type DeliveryMethod = 'pickup' | 'delivery'
-function generateOrderNumber() {
-  return `SH-${Date.now().toString(36).toUpperCase()}`
+interface PlaceOrderResult {
+  order_number: string
+  subtotal: number
+  delivery_fee: number
+  total: number
+  items: OrderEmail['items']
 }
 export default function Checkout() {
   const { lines, subtotal, clear } = useCart()
@@ -54,49 +59,40 @@ export default function Checkout() {
       if (deliveryMethod === 'delivery' && !address.trim()) {
         throw new Error('Please enter your delivery address.')
       }
-      const orderNumber = generateOrderNumber()
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          order_number: orderNumber,
-          customer_name: name.trim(),
-          customer_phone: phone.trim(),
-          customer_email: email.trim(),
-          delivery_method: deliveryMethod,
-          delivery_address:
-            deliveryMethod === 'delivery' ? address.trim() : null,
-          subtotal,
-          delivery_fee: deliveryFee,
-          total,
-          status: 'received',
-        })
-        .select('id, order_number')
-        .single()
+      // Prices and totals are calculated on the server from the products
+      // table — the browser only says which products and how many.
+      const { data, error: orderError } = await supabase.rpc('place_order', {
+        p_customer_name: name.trim(),
+        p_customer_phone: phone.trim(),
+        p_customer_email: email.trim(),
+        p_delivery_method: deliveryMethod,
+        p_delivery_address:
+          deliveryMethod === 'delivery' ? address.trim() : null,
+        p_items: lines.map((line) => ({
+          product_id: line.product.id,
+          quantity: line.quantity,
+        })),
+      })
       if (orderError) {
         throw new Error(orderError.message)
       }
-      if (!order) {
+      const order = data as PlaceOrderResult | null
+      if (!order?.order_number) {
         throw new Error('The order could not be created.')
       }
-      const items = lines.map((line) => ({
-        order_id: order.id,
-        product_name: line.product.name,
-        quantity: line.quantity,
-        unit_price: line.product.price,
-      }))
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(items)
-      if (itemsError) {
-        // Try to remove the parent order if item creation failed.
-        await supabase
-          .from('orders')
-          .delete()
-          .eq('id', order.id)
-        throw new Error(
-          `Order items could not be saved: ${itemsError.message}`,
-        )
-      }
+      await sendOrderEmails({
+        orderNumber: order.order_number,
+        customerName: name.trim(),
+        customerEmail: email.trim(),
+        customerPhone: phone.trim(),
+        deliveryMethod,
+        deliveryAddress:
+          deliveryMethod === 'delivery' ? address.trim() : null,
+        items: order.items,
+        subtotal: order.subtotal,
+        deliveryFee: order.delivery_fee,
+        total: order.total,
+      })
       clear()
       navigate(`/order-status?order=${order.order_number}`)
     } catch (submitError) {
