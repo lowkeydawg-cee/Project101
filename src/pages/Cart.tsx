@@ -3,7 +3,10 @@ import { ArrowLeft, ArrowUpRight, Minus, Plus, X } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { formatRWF } from '@/lib/format'
 import { buttonClass } from '@/components/Button'
+import { usePageMeta } from '@/lib/pageMeta'
 export function Cart() {
+  usePageMeta('Your Order', 'Review your order before checkout.')
+
   const { lines, removeItem, setQuantity, subtotal } = useCart()
 
   if (lines.length === 0) {

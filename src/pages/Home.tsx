@@ -1,29 +1,50 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'wouter'
 import { getProducts, type Product } from '@/data/products'
-import { PrintHeadHero } from '@/components/PrintHeadHero'
-import { StudioTimelapse } from '@/components/StudioTimelapse'
+import { ScrollScrubHero } from '@/components/ScrollScrubHero'
 import { ProductGallery } from '@/components/ProductGallery'
+import { StudioAnswers } from '@/components/StudioAnswers'
+import { StudioTimelapse } from '@/components/StudioTimelapse'
+import { SITE } from '@/lib/site'
+import { usePageMeta } from '@/lib/pageMeta'
+
+/** The three promises that answer the objections people arrive with. */
+const promises = [
+  {
+    label: 'Made to order',
+    body: 'Nothing is bought in and resold. Your piece goes on the machine after you order it.',
+  },
+  {
+    label: `Ready in ${SITE.leadTime}`,
+    body: 'You get the date before you pay, and we tell you the moment it comes off the bed.',
+  },
+  {
+    label: 'Reprinted if wrong',
+    body: 'Damaged or not what was agreed? Send a photo within seven days and we print it again.',
+  },
+]
 
 const steps = [
   {
     n: '01',
     title: 'Tell us what you need',
-    body: 'Have an idea, a reference or an existing 3D file? Start with whatever you have.',
+    body: 'An idea, a photo, a sketch or a finished 3D file. Whatever you have is enough to start.',
   },
   {
     n: '02',
     title: 'We work out the build',
-    body: 'We check the geometry, material and print time, then send you the price and timeline.',
+    body: 'We check the geometry, pick the material and time the print, then send you one price and one date.',
   },
   {
     n: '03',
-    title: 'Made here in Kigali',
-    body: 'Once approved, your piece goes into production. Collect it or arrange delivery.',
+    title: `Printed here in ${SITE.city}`,
+    body: 'Once you approve it, your piece goes into production. Collect it from the studio or have it delivered.',
   },
 ]
 
 export function Home() {
+  usePageMeta('', 'The Safehouse is a Kigali 3D printing studio. Wall art, figurines, tealight modules and custom parts, printed to order.')
+
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -41,7 +62,21 @@ export function Home() {
 
   return (
     <div>
-      <PrintHeadHero />
+      <ScrollScrubHero />
+
+      {/* THE PROMISES */}
+      <section className="border-b border-hairline">
+        <div className="mx-auto grid max-w-[1320px] gap-px bg-hairline sm:grid-cols-3">
+          {promises.map((p) => (
+            <div key={p.label} className="bg-void px-6 py-10 sm:px-8">
+              <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-ink">
+                {p.label}
+              </p>
+              <p className="mt-3 text-[15px] leading-relaxed text-ink-dim">{p.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <StudioTimelapse />
 
@@ -63,6 +98,8 @@ export function Home() {
           ))}
         </div>
       </section>
+
+      <StudioAnswers />
 
       {/* CUSTOM QUOTE */}
       <section className="bg-ink text-void">

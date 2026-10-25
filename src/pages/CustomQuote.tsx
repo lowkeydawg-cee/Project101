@@ -2,6 +2,10 @@ import { useState, lazy, Suspense, type FormEvent } from 'react'
 import { ArrowUpRight, Check, Upload } from 'lucide-react'
 import { TextAreaField, TextField, SelectField } from '@/components/FormField'
 import { Button } from '@/components/Button'
+import { sendInquiry } from '@/lib/notify'
+import { supabase } from '@/lib/supabase'
+import { SITE, whatsappLink } from '@/lib/site'
+import { usePageMeta } from '@/lib/pageMeta'
 
 const StlViewer = lazy(() =>
   import('@/components/StlViewer').then((m) => ({ default: m.StlViewer }))
@@ -14,28 +18,121 @@ const materials = [
   'Resin (fine detail)',
 ]
 
-export function CustomQuote() {
-  const [file, setFile] = useState<File | null>(null)
-  const [submitted, setSubmitted] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+/** Uploads the STL so the quote email can carry a link to it. */
+async function uploadModel(file: File): Promise<string | null> {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const path = `${Date.now()}-${safeName}`
+  const { error } = await supabase.storage.from('quote-files').upload(path, file)
+  if (error) {
+    console.warn('STL upload failed:', error.message)
+    return null
+  }
+  return supabase.storage.from('quote-files').getPublicUrl(path).data.publicUrl
+}
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+export function CustomQuote() {
+  usePageMeta('Custom Quote', 'Send us a model or just an idea. We check the file, pick the material and come back with one price and one date.')
+
+  const [file, setFile] = useState<File | null>(null)
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [draft, setDraft] = useState('')
+  const [modelPending, setModelPending] = useState(false)
+
+  const submitted = state === 'sent'
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const form = new FormData(e.currentTarget)
     const description = String(form.get('description') || '').trim()
+    const name = String(form.get('name') || '').trim()
+    const email = String(form.get('email') || '').trim()
+    const phone = String(form.get('phone') || '').trim()
+    const dimensions = String(form.get('dimensions') || '').trim()
+    const quantity = String(form.get('quantity') || '1').trim()
+    const material = String(form.get('material') || '').trim()
 
     const nextErrors: Record<string, string> = {}
-
-    if (!description) {
-      nextErrors.description = 'Tell us what you’d like fabricated.'
+    if (!description) nextErrors.description = 'Tell us what you’d like fabricated.'
+    if (!name) nextErrors.name = 'Enter your name.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      nextErrors.email = 'Enter an email we can reply to.'
     }
 
     setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
 
-    if (Object.keys(nextErrors).length === 0) {
-      setSubmitted(true)
+    setDraft(
+      `Hi Safehouse, I'm ${name}. I'd like a quote for: ${description}` +
+        (dimensions ? ` (about ${dimensions})` : '') +
+        (quantity && quantity !== '1' ? `, quantity ${quantity}` : '')
+    )
+    setState('sending')
+
+    let modelUrl: string | null = null
+    if (file) modelUrl = await uploadModel(file)
+    setModelPending(Boolean(file) && !modelUrl)
+
+    try {
+      await sendInquiry({
+        kind: 'Custom quote',
+        name,
+        email,
+        phone,
+        message: description,
+        details: {
+          Dimensions: dimensions,
+          Quantity: quantity,
+          Material: material,
+          Model: modelUrl ?? (file ? `${file.name} (upload failed, ask for it)` : 'None attached'),
+        },
+      })
+      setState('sent')
+    } catch {
+      setState('failed')
     }
+  }
+
+  if (state === 'failed') {
+    return (
+      <main className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+        <section className="border-y border-hairline py-20 sm:py-28">
+          <div className="max-w-3xl">
+            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-dim">
+              Request / Not sent
+            </p>
+            <h1 className="mt-5 font-mono text-[clamp(2.5rem,7vw,5.5rem)] uppercase leading-[0.86] tracking-[-0.07em] text-ink">
+              Send it
+              <br />
+              this way.
+            </h1>
+            <p className="mt-8 max-w-xl text-base leading-relaxed text-ink-dim">
+              The request did not go through from here, so it has not reached the
+              studio. Send the same details on WhatsApp or by email and we will
+              price it for you.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <a
+                href={whatsappLink(draft)}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex min-h-[48px] items-center gap-3 bg-ink px-6 font-mono text-[11px] uppercase tracking-[0.14em] text-void transition-opacity hover:opacity-85"
+              >
+                Send on WhatsApp
+                <ArrowUpRight size={14} />
+              </a>
+              <a
+                href={`mailto:${SITE.email}?subject=Custom%20quote&body=${encodeURIComponent(draft)}`}
+                className="inline-flex min-h-[48px] items-center gap-3 border border-ink px-6 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
+              >
+                Send by email
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+    )
   }
 
   if (submitted) {
@@ -69,11 +166,25 @@ export function CustomQuote() {
               your idea.
             </h1>
 
-            <p className="mt-8 max-w-xl font-mono text-xs leading-relaxed text-ink-dim">
-              Your request has been captured in this frontend preview.
-              Once the quote pipeline is connected, we’ll review the details
-              and get back to you with production information.
+            <p className="mt-8 max-w-xl text-base leading-relaxed text-ink-dim">
+              It reached the studio. We review every request by hand and come
+              back with a price and a timeline, usually within one working day.
+              {modelPending
+                ? ' Your model file did not upload, so please send the STL on WhatsApp and we will attach it to your request.'
+                : ''}
             </p>
+
+            <div className="mt-8">
+              <a
+                href={whatsappLink(draft)}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex min-h-[44px] items-center gap-3 border border-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
+              >
+                {modelPending ? 'Send the model on WhatsApp' : 'Add a note on WhatsApp'}
+                <ArrowUpRight size={13} />
+              </a>
+            </div>
 
             <div className="mt-10 flex flex-wrap gap-3">
               <a
@@ -233,6 +344,31 @@ export function CustomQuote() {
 
             </div>
 
+            <div className="mt-10 border-b border-hairline pb-4">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink-dim">
+                Where we send the quote
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-6">
+              <TextField id="name" name="name" label="Your name" error={errors.name} />
+              <div className="grid gap-6 sm:grid-cols-2">
+                <TextField
+                  id="email"
+                  name="email"
+                  type="email"
+                  label="Email"
+                  error={errors.email}
+                />
+                <TextField
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  label="Phone / WhatsApp (optional)"
+                />
+              </div>
+            </div>
+
           </div>
 
           {/* Right */}
@@ -317,8 +453,9 @@ export function CustomQuote() {
           <Button
             type="submit"
             className="shrink-0"
+            disabled={state === 'sending'}
           >
-            Send fabrication request
+            {state === 'sending' ? 'Sending...' : 'Send fabrication request'}
             <ArrowUpRight size={14} aria-hidden="true" />
           </Button>
 

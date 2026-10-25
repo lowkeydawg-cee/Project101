@@ -1,6 +1,7 @@
 import { Link } from 'wouter'
 import { Eyebrow } from '@/components/Eyebrow'
 import { buttonClass } from '@/components/Button'
+import { usePageMeta } from '@/lib/pageMeta'
 
 const principles = [
   {
@@ -18,6 +19,8 @@ const principles = [
 ]
 
 export function About() {
+  usePageMeta('About', 'Who we are and how we work. A small 3D fabrication studio in Kigali, Rwanda.')
+
   return (
     <div>
       <section className="mx-auto max-w-4xl px-6 py-16">
@@ -57,7 +60,7 @@ export function About() {
           <Link href="/shop" className={buttonClass('primary')}>
             Browse Storefront
           </Link>
-          <Link href="/custom" className={buttonClass('secondary')}>
+          <Link href="/custom-quote" className={buttonClass('secondary')}>
             Request a Custom Piece
           </Link>
         </div>

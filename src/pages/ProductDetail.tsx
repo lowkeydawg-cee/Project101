@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import { getProductBySlug, type Product } from '@/data/products'
 import { formatRWF } from '@/lib/format'
 import { useCart } from '@/context/CartContext'
+import { SITE } from '@/lib/site'
+import { usePageMeta } from '@/lib/pageMeta'
 
 export function ProductDetail() {
   const { slug } = useParams()
@@ -22,6 +24,13 @@ export function ProductDetail() {
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
+
+  usePageMeta(
+    product?.name ?? 'Piece',
+    product
+      ? `${product.name}. ${product.description || `${product.material}, 3D printed to order in ${SITE.city}.`} Ready in ${SITE.leadTime}.`
+      : undefined
+  )
 
   if (loading) {
     return (
@@ -356,8 +365,28 @@ export function ProductDetail() {
               </div>
             )}
 
-            <p className="mt-5 font-mono text-[8px] uppercase leading-relaxed tracking-[0.12em] text-ink-dim">
-              Made to order / Produced locally / Kigali, Rwanda
+            {/* The three things people want to know before they commit. */}
+            <dl className="mt-6 border-t border-hairline">
+              {[
+                ['Ready in', `${SITE.leadTime} from order`],
+                ['Collection', `Free from the studio in ${SITE.city}`],
+                ['Delivery', `${SITE.deliveryFee.toLocaleString('en-US')} RWF inside ${SITE.city}`],
+                ['If it arrives wrong', 'We reprint it, free, within 7 days'],
+              ].map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex items-baseline justify-between gap-4 border-b border-hairline py-2.5"
+                >
+                  <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-dim">
+                    {k}
+                  </dt>
+                  <dd className="text-right font-mono text-[11px] text-ink">{v}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <p className="mt-5 font-mono text-[9px] uppercase leading-relaxed tracking-[0.12em] text-ink-dim">
+              Made to order / Printed in {SITE.city}, {SITE.country}
             </p>
 
           </div>

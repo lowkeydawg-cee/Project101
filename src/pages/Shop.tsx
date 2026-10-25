@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { getProducts, type Product } from '../data/products'
 import { ProductCard } from '../components/ProductCard'
+import { usePageMeta } from '@/lib/pageMeta'
 
 export function Shop() {
+  usePageMeta('Storefront', 'Browse 3D printed pieces made to order in our Kigali studio. Collect in Kigali or get it delivered.')
+
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [active, setActive] = useState<string | null>(null)

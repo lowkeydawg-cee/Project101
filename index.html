@@ -2,34 +2,79 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-
+    <title>The Safehouse — 3D Printing Studio in Kigali</title>
     <meta
       name="description"
-      content="Safehouse is a Kigali-based 3D fabrication studio making small-batch objects, useful parts, and custom pieces to order."
+      content="The Safehouse is a Kigali 3D printing studio. Wall art, figurines, tealight modules and custom parts, printed to order. Collect in Kigali or get it delivered."
     />
+    <link rel="canonical" href="https://project101-puce.vercel.app/" />
+    <meta name="theme-color" content="#0b0b0a" />
+    <meta name="robots" content="index, follow" />
 
-    <meta name="theme-color" content="#0a0a0a" />
-
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="/favicon.svg"
+    <!-- Link preview: WhatsApp, Instagram DMs, Facebook, LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Safehouse" />
+    <meta property="og:title" content="The Safehouse — 3D Printing Studio in Kigali" />
+    <meta
+      property="og:description"
+      content="Wall art, figurines, tealight modules and custom parts, printed to order in Kigali."
     />
+    <meta property="og:url" content="https://project101-puce.vercel.app/" />
+    <meta property="og:image" content="https://project101-puce.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Safehouse, a 3D printing studio in Kigali." />
+    <meta property="og:locale" content="en_RW" />
 
-    <title>Safehouse — Kigali 3D Fabrication</title>
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Safehouse — 3D Printing Studio in Kigali" />
+    <meta
+      name="twitter:description"
+      content="Wall art, figurines, tealight modules and custom parts, printed to order in Kigali."
+    />
+    <meta name="twitter:image" content="https://project101-puce.vercel.app/og.png" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Tells Google this is a real local business, so it can show the -->
+    <!-- studio in map and local results for searches like "3D printing Kigali". -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "@id": "https://project101-puce.vercel.app/#business",
+        "name": "The Safehouse",
+        "alternateName": "Domus Tuta",
+        "description": "3D printing studio in Kigali making wall art, figurines, tealight modules and custom parts to order.",
+        "url": "https://project101-puce.vercel.app/",
+        "image": "https://project101-puce.vercel.app/og.png",
+        "priceRange": "RWF",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Kigali",
+          "addressCountry": "RW"
+        },
+        "areaServed": {
+          "@type": "City",
+          "name": "Kigali"
+        },
+        "makesOffer": {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Custom 3D printing",
+            "serviceType": "3D printing and fabrication"
+          }
+        }
+      }
+    </script>
   </head>
 
   <body>
     <div id="root"></div>
-
-    <script
-      type="module"
-      src="/src/main.tsx"
-    ></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

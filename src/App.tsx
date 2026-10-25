@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer'
 import { NavBar } from '@/components/NavBar'
 
 import { Route, Switch } from 'wouter'
+import { Analytics } from '@vercel/analytics/react'
 
 import { Home } from '@/pages/Home'
 import { Shop } from '@/pages/Shop'
@@ -80,6 +81,7 @@ export function App() {
 
         <Footer />
         <CartDrawer />
+        <Analytics />
       </div>
           </CartProvider>
     </AuthProvider>

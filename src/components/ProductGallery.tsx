@@ -31,9 +31,30 @@ export function ProductGallery({
 
         <div className="sh-track-wrap px-4 sm:px-6 lg:px-12">
           {loading ? (
-            <p className="font-mono text-xs uppercase tracking-[0.14em]">Loading pieces...</p>
+            <div className="flex gap-6 pb-2" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="aspect-[4/5] w-[clamp(240px,28vw,400px)] flex-none animate-pulse border border-[#0b0b0a]/25 bg-[#0b0b0a]/5"
+                />
+              ))}
+            </div>
           ) : products.length === 0 ? (
-            <p className="font-mono text-xs uppercase tracking-[0.14em]">New pieces are on the way.</p>
+            <div className="max-w-xl border border-[#0b0b0a] p-8">
+              <p className="font-mono text-[13px] uppercase tracking-[0.14em]">
+                The next batch is still on the bed.
+              </p>
+              <p className="mt-3 text-[15px] leading-relaxed text-[#0b0b0a]/75">
+                Nothing is listed right now. If there is something you want printed,
+                describe it and we will quote it.
+              </p>
+              <Link
+                href="/custom-quote"
+                className="mt-6 inline-flex min-h-[46px] items-center border border-[#0b0b0a] px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#0b0b0a] transition-colors hover:bg-[#0b0b0a] hover:text-[#f2f1eb]"
+              >
+                Start a custom quote
+              </Link>
+            </div>
           ) : (
             <div className="sh-track flex w-max gap-6 pb-2">
               {products.map((p) => (

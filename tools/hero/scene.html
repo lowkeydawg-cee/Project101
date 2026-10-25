@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8" />
+<style>html,body{margin:0;background:#0b0b0a;overflow:hidden}canvas{display:block}</style>
+</head>
+<body>
+<script type="module">
+import * as THREE from './three.module.js'
+
+const W = 1280, H = 720
+const LAYERS = 132          // printed layers in the finished piece
+const LAYER_H = 0.019       // height of one layer, in scene units
+
+const INK   = 0xf2f1eb      // soft white, the printed material
+const STONE = 0xa4a29b      // grey, the machine
+const VOID  = 0x0b0b0a      // black, everything else
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
+renderer.setSize(W, H)
+renderer.setPixelRatio(1)
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+document.body.appendChild(renderer.domElement)
+
+const scene = new THREE.Scene()
+scene.background = new THREE.Color(VOID)
+
+const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 100)
+
+// ── the print bed ────────────────────────────────────────────────
+const bed = new THREE.Mesh(
+  new THREE.BoxGeometry(9, 0.12, 9),
+  new THREE.MeshStandardMaterial({ color: 0x141413, roughness: 0.95, metalness: 0 })
+)
+bed.position.y = -0.06
+bed.receiveShadow = true
+scene.add(bed)
+
+// faint bed grid, the only decoration in the frame
+const grid = new THREE.GridHelper(9, 18, STONE, STONE)
+grid.position.y = 0.002
+grid.material.opacity = 0.14
+grid.material.transparent = true
+scene.add(grid)
+
+// ── the piece: a twisted tealight module, built ring by ring ─────
+// A rounded heptagon that rotates a little on every layer. The twist is
+// what makes it read as printed rather than turned on a lathe.
+const SIDES = 7
+const TWIST = 0.0135           // radians added per layer
+
+function radiusAt(t) {
+  // t runs 0 (bottom) to 1 (top). Waisted in the middle, flared at the lip.
+  return 0.92 + Math.pow(t, 1.5) * 0.46 - Math.sin(t * Math.PI) * 0.22
+}
+
+const wallMat = new THREE.MeshStandardMaterial({
+  color: INK,
+  roughness: 0.78,
+  metalness: 0.0,
+  side: THREE.DoubleSide,
+  flatShading: true,
+})
+
+// Every other layer sits a hair proud, so the key light catches each one
+// and you get real layer lines instead of a smooth skin.
+const proud = (i) => (i % 2 === 0 ? 1.0 : 0.994)
+
+const build = new THREE.Group()
+build.position.x = 0.55
+scene.add(build)
+
+const layers = []
+for (let i = 0; i < LAYERS; i++) {
+  const t0 = i / LAYERS
+  const t1 = (i + 1) / LAYERS
+  const ring = new THREE.Mesh(
+    new THREE.CylinderGeometry(
+      radiusAt(t1) * proud(i),
+      radiusAt(t0) * proud(i),
+      LAYER_H * 1.04,
+      SIDES,
+      1,
+      true
+    ),
+    wallMat
+  )
+  ring.position.y = i * LAYER_H + LAYER_H / 2
+  ring.rotation.y = i * TWIST
+  ring.castShadow = true
+  ring.receiveShadow = true
+  ring.visible = false
+  build.add(ring)
+  layers.push(ring)
+}
+
+// solid base disc, printed first
+const base = new THREE.Mesh(
+  new THREE.CylinderGeometry(radiusAt(0), radiusAt(0), LAYER_H * 2.4, SIDES),
+  wallMat
+)
+base.position.y = LAYER_H * 1.2
+base.castShadow = true
+base.receiveShadow = true
+base.visible = false
+build.add(base)
+
+// ── the print head ───────────────────────────────────────────────
+const head = new THREE.Group()
+const block = new THREE.Mesh(
+  new THREE.BoxGeometry(0.34, 0.26, 0.34),
+  new THREE.MeshStandardMaterial({ color: STONE, roughness: 0.5, metalness: 0.1 })
+)
+block.position.y = 0.23
+head.add(block)
+const nozzle = new THREE.Mesh(
+  new THREE.ConeGeometry(0.055, 0.16, 18),
+  new THREE.MeshStandardMaterial({ color: STONE, roughness: 0.35, metalness: 0.2 })
+)
+nozzle.position.y = 0.04
+nozzle.rotation.x = Math.PI
+head.add(nozzle)
+build.add(head)
+
+// the gantry rail the head rides on
+const rail = new THREE.Mesh(
+  new THREE.BoxGeometry(8.2, 0.05, 0.13),
+  new THREE.MeshStandardMaterial({ color: STONE, roughness: 0.6, metalness: 0.15 })
+)
+build.add(rail)
+
+// ── the flame, lit at the very end ───────────────────────────────
+const flameMat = new THREE.MeshBasicMaterial({ color: INK, transparent: true, opacity: 0 })
+const flame = new THREE.Mesh(new THREE.SphereGeometry(0.075, 20, 20), flameMat)
+flame.scale.set(1, 1.8, 1)
+build.add(flame)
+
+const candle = new THREE.PointLight(INK, 0, 7, 2)
+build.add(candle)
+
+// ── lighting: one hard key, one soft fill, nothing else ──────────
+const key = new THREE.DirectionalLight(0xffffff, 2.5)
+key.position.set(-5.5, 7.5, 4.5)
+key.castShadow = true
+key.shadow.mapSize.set(2048, 2048)
+key.shadow.camera.near = 1
+key.shadow.camera.far = 26
+key.shadow.camera.left = -6
+key.shadow.camera.right = 6
+key.shadow.camera.top = 6
+key.shadow.camera.bottom = -6
+key.shadow.bias = -0.0012
+scene.add(key)
+
+const fill = new THREE.DirectionalLight(0xffffff, 0.3)
+fill.position.set(6, 2.5, -4)
+scene.add(fill)
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.14))
+
+// ── the journey ──────────────────────────────────────────────────
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
+
+window.renderFrame = function (p) {
+  // p: 0 at the top of the scroll, 1 at the bottom
+
+  // printing occupies the first 86 percent, then the piece is lit
+  // a couple of layers are already down at the very top, so the opening
+  // frame has something to look at instead of an empty bed
+  const buildRaw = Math.min(1, (p + 0.014) / 0.86)
+  const build = easeInOut(buildRaw)
+  const printed = Math.floor(build * LAYERS)
+
+  base.visible = printed > 0
+  for (let i = 0; i < LAYERS; i++) layers[i].visible = i < printed
+
+  const topY = Math.max(LAYER_H * 2, printed * LAYER_H)
+  const fullY = LAYERS * LAYER_H
+
+  // the head sits just above the layer it is laying down and orbits it
+  const spin = p * Math.PI * 9
+  const r = radiusAt(Math.min(1, printed / LAYERS))
+  head.position.set(Math.cos(spin) * r, topY + 0.015, Math.sin(spin) * r)
+  head.visible = buildRaw < 1
+  rail.position.set(0, topY + 0.3, Math.sin(spin) * r)
+  rail.visible = buildRaw < 1
+
+  // Camera: starts low and tight at bed level, rises and pulls back as the
+  // piece grows. The object rides the right of frame so the left stays clear
+  // for the words.
+  const c = easeInOut(p)
+  // portrait poster: sit further back and centre the piece in frame
+  const port = window.portrait
+  const camR = port ? 11.0 : 3.9 + c * 3.5
+  const camA = -0.50 + c * 0.80
+  camera.position.set(
+    Math.sin(camA) * camR + (port ? 0.55 : 0.55),
+    port ? 4.6 : 0.62 + c * 2.95,
+    Math.cos(camA) * camR
+  )
+  // early on the camera holds the piece near the middle; as the piece grows
+  // the frame drifts so it settles right of centre, leaving the left clear.
+  camera.lookAt(port ? -0.55 : 0.25 - c * 1.05, port ? fullY * 0.88 : 0.16 + Math.min(topY, fullY) * 0.46, 0)
+
+  // the tealight comes up in the last stretch
+  const lit = Math.max(0, (p - 0.86) / 0.14)
+  const flameY = fullY * 0.74
+  flame.position.set(0, flameY, 0)
+  flame.visible = lit > 0
+  flame.scale.set(0.6 + lit * 0.5, 1.1 + lit * 0.9, 0.6 + lit * 0.5)
+  flameMat.opacity = Math.min(1, lit * 1.5)
+  candle.position.set(0, flameY, 0)
+  candle.intensity = lit * 13
+
+  renderer.render(scene, camera)
+}
+
+// Portrait rendering for the phone poster: resize, and pull the framing back
+// to centre so the piece is not hugging an edge on a narrow screen.
+window.portrait = false
+window.setSize = function (w, h, portrait) {
+  renderer.setSize(w, h)
+  camera.aspect = w / h
+  camera.updateProjectionMatrix()
+  window.portrait = Boolean(portrait)
+}
+
+window.ready = true
+</script>
+</body>
+</html>

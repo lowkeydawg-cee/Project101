@@ -1,14 +1,20 @@
 import { useState } from 'react'
 
 /**
- * A looping black-and-white time-lapse of the printer at work.
- * Drop the clip in /public/studio-timelapse.mp4 (MP4, muted, ideally
- * under ~8 MB and 10–20 s). Until it exists, a labelled placeholder shows.
+ * A looping black-and-white time-lapse of the real printer at work. This is
+ * the strongest proof on the site: it shows the studio exists.
+ *
+ * SAINT: record 10 to 20 seconds of a print running, save it as
+ * public/studio-timelapse.mp4 (muted, under about 8 MB) and this section
+ * appears on the homepage by itself. Until that file exists the section
+ * renders nothing at all, so the page never shows an empty box.
  */
 const VIDEO_SRC = '/studio-timelapse.mp4'
 
 export function StudioTimelapse() {
   const [missing, setMissing] = useState(false)
+
+  if (missing) return null
 
   return (
     <section className="border-b border-hairline">
@@ -29,23 +35,17 @@ export function StudioTimelapse() {
         </div>
 
         <div className="sh-in relative aspect-video overflow-hidden border border-hairline bg-panel">
-          {missing ? (
-            <div className="flex h-full w-full items-center justify-center p-6 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-ink-dim">
-              [Studio time-lapse — add public/studio-timelapse.mp4]
-            </div>
-          ) : (
-            <video
-              className="h-full w-full object-cover grayscale"
-              src={VIDEO_SRC}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-label="Time-lapse of a piece being 3D printed in the Safehouse studio"
-              onError={() => setMissing(true)}
-            />
-          )}
+          <video
+            className="h-full w-full object-cover grayscale"
+            src={VIDEO_SRC}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label="Time-lapse of a piece being 3D printed in the Safehouse studio"
+            onError={() => setMissing(true)}
+          />
         </div>
       </div>
     </section>

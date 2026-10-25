@@ -3,6 +3,7 @@ import { Link, useSearch } from 'wouter'
 import { ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { OrderTracker } from '@/components/OrderTracker'
+import { usePageMeta } from '@/lib/pageMeta'
 
 type OrderStatusValue =
   | 'received'
@@ -20,6 +21,8 @@ type Order = {
 }
 
 export function OrderStatus() {
+  usePageMeta('Track an Order', 'Enter your order number to see where your piece is.')
+
   const search = useSearch()
   const params = new URLSearchParams(search)
   const orderNumber = params.get('order')

@@ -14,6 +14,10 @@ const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined
 const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string | undefined
 const ADMIN_TEMPLATE = import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID as string | undefined
 const CUSTOMER_TEMPLATE = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID as string | undefined
+const INQUIRY_TEMPLATE = import.meta.env.VITE_EMAILJS_INQUIRY_TEMPLATE_ID as string | undefined
+
+/** True when email is configured, so a form can tell the visitor the truth. */
+export const emailConfigured = Boolean(SERVICE_ID && PUBLIC_KEY)
 
 export interface OrderEmail {
   orderNumber: string
@@ -75,4 +79,43 @@ export async function sendOrderEmails(order: OrderEmail): Promise<void> {
   for (const r of results) {
     if (r.status === 'rejected') console.warn('Order email failed:', r.reason)
   }
+}
+
+export interface Inquiry {
+  /** Where it came from, so you can tell a contact note from a quote request. */
+  kind: 'Contact' | 'Custom quote'
+  name: string
+  email: string
+  phone?: string
+  message: string
+  /** Extra lines shown under the message, e.g. material and quantity. */
+  details?: Record<string, string>
+}
+
+/**
+ * Sends a contact note or a custom quote request to the shop inbox.
+ * Throws when it cannot send, so the form can show a fallback instead of
+ * pretending the message arrived.
+ */
+export async function sendInquiry(inquiry: Inquiry): Promise<void> {
+  if (!SERVICE_ID || !PUBLIC_KEY || !INQUIRY_TEMPLATE) {
+    throw new Error('Email is not configured yet.')
+  }
+
+  const extra = inquiry.details
+    ? Object.entries(inquiry.details)
+        .filter(([, v]) => v)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join('\n')
+    : ''
+
+  await send(INQUIRY_TEMPLATE, {
+    kind: inquiry.kind,
+    customer_name: inquiry.name,
+    customer_email: inquiry.email,
+    customer_phone: inquiry.phone ?? '',
+    message: inquiry.message,
+    details: extra,
+    page: typeof window === 'undefined' ? '' : window.location.href,
+  })
 }
