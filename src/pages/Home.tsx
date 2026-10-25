@@ -4,6 +4,7 @@ import { getProducts, type Product } from '@/data/products'
 import { ScrollScrubHero } from '@/components/ScrollScrubHero'
 import { ProductGallery } from '@/components/ProductGallery'
 import { StudioAnswers } from '@/components/StudioAnswers'
+import { DetailBand } from '@/components/DetailBand'
 import { StudioTimelapse } from '@/components/StudioTimelapse'
 import { SITE } from '@/lib/site'
 import { usePageMeta } from '@/lib/pageMeta'
@@ -81,6 +82,8 @@ export function Home() {
       <StudioTimelapse />
 
       <ProductGallery products={products} loading={loading} />
+
+      <DetailBand />
 
       {/* HOW IT WORKS */}
       <section className="border-b border-hairline">

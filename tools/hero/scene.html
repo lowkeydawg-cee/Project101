@@ -18,9 +18,31 @@ const VOID  = 0x0b0b0a      // black, everything else
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
 renderer.setSize(W, H)
 renderer.setPixelRatio(1)
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 1.05
+renderer.outputColorSpace = THREE.SRGBColorSpace
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFSoftShadowMap
 document.body.appendChild(renderer.domElement)
+
+/** Fine grain, so the surface is PLA rather than modelling clay. */
+function grainTexture() {
+  const n = 512
+  const d = new Uint8Array(n * n * 4)
+  for (let y = 0; y < n; y++) {
+    const band = Math.sin(y * 0.78) * 0.5 + 0.5
+    for (let x = 0; x < n; x++) {
+      const v = 120 + band * 50 + Math.random() * 50
+      const i = (y * n + x) * 4
+      d[i] = d[i + 1] = d[i + 2] = v
+      d[i + 3] = 255
+    }
+  }
+  const t = new THREE.DataTexture(d, n, n)
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.needsUpdate = true
+  return t
+}
 
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(VOID)
@@ -56,8 +78,9 @@ function radiusAt(t) {
 
 const wallMat = new THREE.MeshStandardMaterial({
   color: INK,
-  roughness: 0.78,
+  roughness: 0.66,
   metalness: 0.0,
+  roughnessMap: grainTexture(),
   side: THREE.DoubleSide,
   flatShading: true,
 })
@@ -156,7 +179,12 @@ const fill = new THREE.DirectionalLight(0xffffff, 0.3)
 fill.position.set(6, 2.5, -4)
 scene.add(fill)
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.14))
+// Rim from behind, just enough to draw an edge against the black.
+const rim = new THREE.DirectionalLight(0xffffff, 0.85)
+rim.position.set(3.4, 1.8, -6.5)
+scene.add(rim)
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.12))
 
 // ── the journey ──────────────────────────────────────────────────
 const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)
@@ -167,7 +195,7 @@ window.renderFrame = function (p) {
   // printing occupies the first 86 percent, then the piece is lit
   // a couple of layers are already down at the very top, so the opening
   // frame has something to look at instead of an empty bed
-  const buildRaw = Math.min(1, (p + 0.014) / 0.86)
+  const buildRaw = Math.min(1, 0.17 + p * 0.97)
   const build = easeInOut(buildRaw)
   const printed = Math.floor(build * LAYERS)
 
@@ -191,11 +219,11 @@ window.renderFrame = function (p) {
   const c = easeInOut(p)
   // portrait poster: sit further back and centre the piece in frame
   const port = window.portrait
-  const camR = port ? 11.0 : 3.9 + c * 3.5
+  const camR = port ? 11.0 : 2.45 + c * 4.95
   const camA = -0.50 + c * 0.80
   camera.position.set(
     Math.sin(camA) * camR + (port ? 0.55 : 0.55),
-    port ? 4.6 : 0.62 + c * 2.95,
+    port ? 4.6 : 0.30 + c * 3.25,
     Math.cos(camA) * camR
   )
   // early on the camera holds the piece near the middle; as the piece grows
@@ -223,6 +251,18 @@ window.setSize = function (w, h, portrait) {
   camera.aspect = w / h
   camera.updateProjectionMatrix()
   window.portrait = Boolean(portrait)
+}
+
+/**
+ * A macro frame of the finished surface, for the detail band on the page.
+ * dist is how close the camera sits to the wall, targetY the height on the
+ * piece to look at, azim which face to look at.
+ */
+window.renderMacro = function (dist, targetY, azim) {
+  window.renderFrame(1)
+  camera.position.set(Math.sin(azim) * dist + 0.55, targetY + 0.3, Math.cos(azim) * dist)
+  camera.lookAt(0.55, targetY, 0)
+  renderer.render(scene, camera)
 }
 
 window.ready = true
