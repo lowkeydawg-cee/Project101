@@ -51,8 +51,8 @@ const stages = [
 export function OrderTracker({
   currentStage = 'production',
   orderNumber = '001',
-  estimatedReady = '02 — 04 OCT',
-  deliveryTime = '1 — 2 days after production',
+  estimatedReady = '02 to 04 OCT',
+  deliveryTime = '1 to 2 days after production',
   location = 'Safehouse Studio / Kigali',
 }: OrderTrackerProps) {
   const currentIndex = stages.findIndex(

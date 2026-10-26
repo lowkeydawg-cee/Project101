@@ -64,9 +64,17 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-hairline px-6 py-5">
-        <p className="mx-auto max-w-7xl font-mono-label text-[10px] uppercase text-ink-dim">
-          © {new Date().getFullYear()} The Safehouse. All artifacts fabricated in Kigali.
-        </p>
+        <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-x-8 gap-y-2">
+          <p className="font-mono-label text-[10px] uppercase text-ink-dim">
+            © {new Date().getFullYear()} The Safehouse. All artifacts fabricated in {SITE.city}.
+          </p>
+          {/* Said plainly, because a buyer deserves to know which pictures are
+              of a real object and which are setting a mood. Product photos on
+              the storefront are real; these are not. */}
+          <p className="font-mono-label text-[10px] uppercase text-ink-dim">
+            Studio and lifestyle imagery is illustrative
+          </p>
+        </div>
       </div>
     </footer>
   )

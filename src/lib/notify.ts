@@ -5,7 +5,7 @@
  *   - one to the shop (the admin template's "To" address is set in EmailJS)
  *   - one to the customer (the customer template's "To" is {{customer_email}})
  *
- * If the VITE_EMAILJS_* variables aren't set, this does nothing — orders
+ * If the VITE_EMAILJS_* variables aren't set, this does nothing, orders
  * still go through, you just won't get emails. Email failures never block
  * or undo an order.
  */
@@ -61,9 +61,9 @@ export async function sendOrderEmails(order: OrderEmail): Promise<void> {
     customer_email: order.customerEmail,
     customer_phone: order.customerPhone,
     delivery_method: order.deliveryMethod === 'delivery' ? 'Delivery' : 'Pickup',
-    delivery_address: order.deliveryAddress ?? '—',
+    delivery_address: order.deliveryAddress ?? 'Not given',
     items: order.items
-      .map((i) => `${i.quantity} × ${i.name} — ${rwf(i.unit_price * i.quantity)}`)
+      .map((i) => `${i.quantity} × ${i.name} · ${rwf(i.unit_price * i.quantity)}`)
       .join('\n'),
     subtotal: rwf(order.subtotal),
     delivery_fee: order.deliveryFee ? rwf(order.deliveryFee) : 'Free',

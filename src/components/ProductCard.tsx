@@ -120,7 +120,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           ↗
         </div>
 
-        {/* Technical overlay — real spec fields only, revealed on hover */}
+        {/* Technical overlay, real spec fields only, revealed on hover */}
         <div
           className="
             absolute

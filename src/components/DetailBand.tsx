@@ -13,15 +13,15 @@ export function DetailBand() {
   return (
     <section className="relative border-b border-hairline bg-[#0b0b0a]">
       <img
-        src="/detail-layers.jpg"
-        srcSet="/detail-layers-sm.jpg 1000w, /detail-layers.jpg 2000w"
+        src="/photo/layers-macro.jpg"
+        srcSet="/photo/layers-macro-sm.jpg 800w, /photo/layers-macro.jpg 1600w"
         sizes="100vw"
-        alt="Close-up of the printed surface, showing the individual layers twisting around the piece."
+        alt="Close-up of two printed pieces, the raking light picking out every individual layer."
         className="h-[46vh] max-h-[460px] min-h-[260px] w-full object-cover"
         loading="lazy"
         decoding="async"
-        width={2000}
-        height={750}
+        width={1600}
+        height={900}
       />
 
       {/* Narrow screens have no clear lane to the side, so the wash goes

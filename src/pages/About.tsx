@@ -14,7 +14,7 @@ const principles = [
   },
   {
     title: 'Your file, your piece',
-    body: 'If you can model it, we can likely print it — bring your own STL any time.',
+    body: 'If you can model it, we can likely print it. Bring your own STL any time.',
   },
 ]
 
@@ -32,7 +32,7 @@ export function About() {
         </h1>
         <p className="mt-6 max-w-xl text-ink-dim">
           The Safehouse started as a handful of printers and a growing catalog of
-          objects worth keeping. We fabricate on demand out of Kigali — a mix of
+          objects worth keeping. We fabricate on demand out of Kigali, a mix of
           our own designs and pieces our customers bring in as their own files.
         </p>
       </section>

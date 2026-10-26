@@ -60,7 +60,7 @@ export default function Checkout() {
         throw new Error('Please enter your delivery address.')
       }
       // Prices and totals are calculated on the server from the products
-      // table — the browser only says which products and how many.
+      // table, the browser only says which products and how many.
       const { data, error: orderError } = await supabase.rpc('place_order', {
         p_customer_name: name.trim(),
         p_customer_phone: phone.trim(),

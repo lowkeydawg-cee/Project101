@@ -148,7 +148,7 @@ export function StlViewer({ file, onFileSelect }: StlViewerProps) {
             onChange={(e) => handleFiles(e.target.files)}
           />
         </label>
-        <p className="text-xs text-ink-dim">.stl only, previewed in-browser — no upload yet</p>
+        <p className="text-xs text-ink-dim">.stl only, previewed in your browser, nothing is uploaded yet</p>
         {status === 'error' && (
           <p role="alert" className="flex items-center gap-1 text-xs text-signal-soft">
             <AlertTriangle size={14} aria-hidden="true" /> That file isn't a valid .stl

@@ -3,7 +3,7 @@ interface EyebrowProps {
   className?: string
 }
 
-// Bracketed mono eyebrow — inherited from the Safehouse brand mark, used only
+// Bracketed mono eyebrow, inherited from the Safehouse brand mark, used only
 // for genuine section labels, not sprinkled as decoration.
 export function Eyebrow({ children, className = '' }: EyebrowProps) {
   return (

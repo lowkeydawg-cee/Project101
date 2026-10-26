@@ -363,7 +363,7 @@ export function AdminOrders() {
                         order.location ?? '',
                       )
                     }
-                    placeholder="02 — 04 OCT"
+                    placeholder="02 to 04 OCT"
                     className="mt-3 w-full border border-hairline bg-transparent px-3 py-3 font-mono text-[10px] uppercase text-ink outline-none disabled:opacity-50"
                   />
                 </label>

@@ -95,7 +95,7 @@ export function AdminDashboard() {
             </h1>
 
             <p className="mt-5 max-w-md font-mono text-[9px] uppercase leading-relaxed tracking-[0.1em] text-ink-dim">
-              Storefront, orders and production — managed from one place.
+              Storefront, orders and production, managed from one place.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export function AdminDashboard() {
           </div>
 
           <p className="mt-6 font-mono text-4xl tracking-[-0.06em] text-ink">
-            {loading ? '—' : String(products.length).padStart(2, '0')}
+            {loading ? '··' : String(products.length).padStart(2, '0')}
           </p>
 
           <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.14em] text-ink-dim">
@@ -154,7 +154,7 @@ export function AdminDashboard() {
           </div>
 
           <p className="mt-6 font-mono text-4xl tracking-[-0.06em] text-ink">
-            {loading ? '—' : String(orders.length).padStart(2, '0')}
+            {loading ? '··' : String(orders.length).padStart(2, '0')}
           </p>
 
           <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.14em] text-ink-dim">
@@ -168,7 +168,7 @@ export function AdminDashboard() {
           </p>
 
           <p className="mt-6 font-mono text-4xl tracking-[-0.06em] text-ink">
-            {loading ? '—' : String(productionOrders).padStart(2, '0')}
+            {loading ? '··' : String(productionOrders).padStart(2, '0')}
           </p>
 
           <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.14em] text-ink-dim">
@@ -182,7 +182,7 @@ export function AdminDashboard() {
           </p>
 
           <p className="mt-6 font-mono text-4xl tracking-[-0.06em] text-ink">
-            {loading ? '—' : String(pendingOrders).padStart(2, '0')}
+            {loading ? '··' : String(pendingOrders).padStart(2, '0')}
           </p>
 
           <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.14em] text-ink-dim">

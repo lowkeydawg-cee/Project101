@@ -26,3 +26,6 @@ dist-ssr
 .env.local
 .env.*
 !.env.example
+
+# Raw Higgsfield generations and review files, never shipped
+review/

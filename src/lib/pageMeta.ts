@@ -10,7 +10,7 @@ import { SITE } from './site'
  */
 export function usePageMeta(title: string, description?: string) {
   useEffect(() => {
-    document.title = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`
+    document.title = title ? `${title} · ${SITE.name}` : `${SITE.name} · ${SITE.tagline}`
 
     if (description) {
       let tag = document.querySelector('meta[name="description"]')

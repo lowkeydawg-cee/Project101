@@ -39,7 +39,7 @@ export function OrderStatus() {
         return
       }
 
-      // Looks up one order by number and returns only status fields —
+      // Looks up one order by number and returns only status fields,
       // customer details stay private (see supabase/orders-security.sql).
       const { data, error } = await supabase
         .rpc('get_order_status', { p_order_number: orderNumber })
@@ -117,7 +117,7 @@ export function OrderStatus() {
             deliveryTime={
               order.delivery_method === 'pickup'
                 ? 'Pickup after production'
-                : '1 — 2 days after production'
+                : '1 to 2 days after production'
             }
             location={order.location || 'Safehouse Studio / Kigali'}
           />
