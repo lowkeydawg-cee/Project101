@@ -3,7 +3,7 @@ import { type ButtonHTMLAttributes } from 'react'
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'disabled'
 
 export const buttonBase =
-  'inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-mono-label text-[11px] uppercase transition-colors duration-200 disabled:cursor-not-allowed'
+  'sh-btn inline-flex items-center justify-center gap-2 px-6 py-3 font-mono-label text-[11px] uppercase transition-colors duration-200 disabled:cursor-not-allowed'
 
 export const buttonVariants: Record<ButtonVariant, string> = {
   primary: 'bg-signal text-void hover:bg-signal-soft hover:text-void',

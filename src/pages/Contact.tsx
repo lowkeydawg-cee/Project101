@@ -63,7 +63,7 @@ export function Contact() {
                 href={whatsappLink(draft)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="mt-5 inline-flex min-h-[44px] items-center border border-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
+                className="mt-5 sh-btn inline-flex min-h-[44px] items-center border border-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
               >
                 Open WhatsApp instead
               </a>
@@ -83,13 +83,13 @@ export function Contact() {
                   href={whatsappLink(draft)}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="inline-flex min-h-[44px] items-center bg-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-void transition-opacity hover:opacity-85"
+                  className="sh-btn inline-flex min-h-[44px] items-center bg-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-void transition-opacity hover:opacity-85"
                 >
                   Send on WhatsApp
                 </a>
                 <a
                   href={`mailto:${SITE.email}?body=${encodeURIComponent(draft)}`}
-                  className="inline-flex min-h-[44px] items-center border border-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
+                  className="sh-btn inline-flex min-h-[44px] items-center border border-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
                 >
                   Send by email
                 </a>

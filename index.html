@@ -36,6 +36,21 @@
     />
     <meta name="twitter:image" content="https://project101-puce.vercel.app/og.png" />
 
+    <!-- Applies the visitor's saved theme and style before the page paints, so
+         nobody sees the wrong look flash on load. -->
+    <script>
+      (function () {
+        var d = document.documentElement
+        try {
+          if (localStorage.getItem('safehouse-theme') !== 'light') d.classList.add('dark')
+          d.dataset.style = localStorage.getItem('safehouse-style') === 'glass' ? 'glass' : 'minimal'
+        } catch (e) {
+          d.classList.add('dark')
+          d.dataset.style = 'minimal'
+        }
+      })()
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
 

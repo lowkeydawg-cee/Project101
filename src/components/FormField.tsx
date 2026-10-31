@@ -1,7 +1,7 @@
 import { type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from 'react'
 
 const fieldClass =
-  'w-full rounded-lg border border-ink/20 bg-panel-raised px-4 py-3 text-sm text-ink placeholder:text-ink-dim/70 focus-visible:border-signal-soft'
+  'sh-field w-full border border-ink/20 bg-panel-raised px-4 py-3 text-sm text-ink placeholder:text-ink-dim/70 focus-visible:border-signal-soft'
 
 interface WrapperProps {
   label: string

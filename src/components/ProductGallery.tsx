@@ -50,7 +50,7 @@ export function ProductGallery({
               </p>
               <Link
                 href="/custom-quote"
-                className="mt-6 inline-flex min-h-[46px] items-center border border-[#0b0b0a] px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#0b0b0a] transition-colors hover:bg-[#0b0b0a] hover:text-[#f2f1eb]"
+                className="mt-6 sh-btn inline-flex min-h-[46px] items-center border border-[#0b0b0a] px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#0b0b0a] transition-colors hover:bg-[#0b0b0a] hover:text-[#f2f1eb]"
               >
                 Start a custom quote
               </Link>

@@ -34,7 +34,7 @@ export function App() {
     return (
     <AuthProvider>
       <CartProvider>
-      <div className="relative flex min-h-screen flex-col bg-void text-ink">
+      <div className="sh-shell relative flex min-h-screen flex-col bg-void text-ink">
         <NavBar />
 
         <main className="flex-1">

@@ -3,6 +3,7 @@ import { Link } from 'wouter'
 import { Menu, X, ShoppingBag } from 'lucide-react'
 import { useCart } from '@/context/CartContext'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { StyleSwitch } from '@/components/StyleSwitch'
 
 const links = [
   { href: '/shop', label: 'Storefront' },
@@ -36,6 +37,7 @@ export function NavBar() {
               {l.label}
             </Link>
           ))}
+          <StyleSwitch />
           <ThemeToggle />
           <Link
             href="/cart"
@@ -77,6 +79,10 @@ export function NavBar() {
                 {l.label}
               </Link>
             ))}
+            <div className="flex items-center justify-between gap-4 border-t border-hairline pt-4">
+              <span className="font-mono-label text-[11px] uppercase text-ink-dim">Style</span>
+              <StyleSwitch />
+            </div>
             <div className="flex items-center justify-between gap-4">
               <Link
                 href="/cart"

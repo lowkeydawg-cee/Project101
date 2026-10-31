@@ -73,7 +73,7 @@ export function Home() {
 
       {/* THE PROMISES */}
       <section className="border-b border-hairline">
-        <div className="mx-auto grid max-w-[1320px] gap-px bg-hairline sm:grid-cols-3">
+        <div className="sh-cells mx-auto grid max-w-[1320px] gap-px bg-hairline sm:grid-cols-3">
           {promises.map((p) => (
             <div key={p.label} className="bg-void px-6 py-10 sm:px-8">
               <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-ink">
@@ -110,9 +110,9 @@ export function Home() {
               <div className="font-mono text-xs uppercase tracking-[0.16em] text-ink-dim">
                 Step {s.n}
               </div>
-              <div className="mt-4 font-mono text-[22px] font-medium uppercase tracking-[-0.03em] text-ink">
+              <h3 className="mt-4 font-mono text-[22px] font-medium uppercase tracking-[-0.03em] text-ink">
                 {s.title}
-              </div>
+              </h3>
               <div className="mt-2.5 text-base leading-relaxed text-ink-dim">{s.body}</div>
             </div>
           ))}
@@ -150,7 +150,7 @@ export function Home() {
             </p>
             <Link
               href="/shop"
-              className="mt-7 inline-flex min-h-[48px] items-center border border-ink px-6 font-mono text-[12px] uppercase tracking-[0.12em] text-ink transition-colors hover:bg-ink hover:text-void"
+              className="mt-7 sh-btn inline-flex min-h-[48px] items-center border border-ink px-6 font-mono text-[12px] uppercase tracking-[0.12em] text-ink transition-colors hover:bg-ink hover:text-void"
             >
               See what is on the bed
             </Link>
@@ -168,7 +168,7 @@ export function Home() {
           </h2>
           <Link
             href="/custom-quote"
-            className="inline-flex min-h-[52px] items-center bg-void px-7 font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-ink transition-opacity hover:opacity-85"
+            className="sh-btn inline-flex min-h-[52px] items-center bg-void px-7 font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-ink transition-opacity hover:opacity-85"
           >
             Start a custom quote
           </Link>

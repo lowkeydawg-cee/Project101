@@ -263,13 +263,13 @@ export function ScrollScrubHero() {
           <div className="mt-10 flex flex-wrap items-center gap-6 lg:mt-14">
             <Link
               href="/shop"
-              className="inline-flex min-h-[52px] items-center bg-[#f2f1eb] px-7 font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-[#0b0b0a] transition-opacity hover:opacity-85"
+              className="sh-btn inline-flex min-h-[52px] items-center bg-[#f2f1eb] px-7 font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-[#0b0b0a] transition-opacity hover:opacity-85"
             >
               Browse the pieces
             </Link>
             <Link
               href="/custom-quote"
-              className="inline-flex min-h-[52px] items-center border border-[#a4a29b] px-7 font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-[#f2f1eb] transition-colors hover:bg-[#f2f1eb] hover:text-[#0b0b0a]"
+              className="sh-btn inline-flex min-h-[52px] items-center border border-[#a4a29b] px-7 font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-[#f2f1eb] transition-colors hover:bg-[#f2f1eb] hover:text-[#0b0b0a]"
             >
               Print my own design
             </Link>

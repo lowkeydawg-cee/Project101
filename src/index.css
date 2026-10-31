@@ -193,3 +193,178 @@ img {
     transform: none !important;
   }
 }
+
+/* =========================================================
+   STYLE AXIS: minimal (default) and glass
+   Chosen by each visitor in the nav, stored on <html data-style>.
+   Light and dark still work inside both.
+   ========================================================= */
+
+:root {
+  --radius-btn: 0px;
+  --radius-card: 0px;
+  --radius-field: 0px;
+}
+
+.sh-btn,
+.sh-seg,
+.sh-seg-btn { border-radius: var(--radius-btn); }
+.sh-field { border-radius: var(--radius-field); }
+
+/* ── GLASS: tokens ── */
+
+:root[data-style="glass"] {
+  --font-display-stack: "Bricolage Grotesque Variable", "Hanken Grotesk", system-ui, sans-serif;
+  --font-sans-stack: "Hanken Grotesk", system-ui, sans-serif;
+  --font-mono-stack: "Hanken Grotesk", system-ui, sans-serif;
+
+  --radius-btn: 999px;
+  --radius-card: 22px;
+  --radius-field: 14px;
+
+  /* light glass. The see-through fills live in their own tokens so text that
+     borrows --void or --panel (labels on dark buttons) stays solid. */
+  --glass-base: #efeee8;
+  --glass-void: rgba(255, 255, 255, 0.42);
+  --glass-panel: rgba(255, 255, 255, 0.52);
+  --glass-panel-raised: rgba(255, 255, 255, 0.66);
+  --glass-nav: rgba(255, 255, 255, 0.72);
+  --hairline: rgba(11, 11, 10, 0.1);
+  --glass-edge: rgba(255, 255, 255, 0.78);
+  --glass-shadow: 0 12px 40px -18px rgba(60, 40, 25, 0.35);
+  --tint-a: rgba(214, 150, 116, 0.55); /* Kigali clay */
+  --tint-b: rgba(150, 172, 206, 0.55); /* lake slate */
+  --tint-c: rgba(164, 162, 155, 0.45); /* the brand grey */
+}
+
+:root.dark[data-style="glass"] {
+  --glass-base: #0b0b0a;
+  --glass-void: rgba(24, 24, 22, 0.5);
+  --glass-panel: rgba(30, 30, 28, 0.56);
+  --glass-panel-raised: rgba(46, 46, 43, 0.62);
+  --glass-nav: rgba(26, 26, 24, 0.62);
+  --hairline: rgba(242, 241, 235, 0.12);
+  --glass-edge: rgba(242, 241, 235, 0.16);
+  --glass-shadow: 0 18px 50px -20px rgba(0, 0, 0, 0.75);
+  --tint-a: rgba(158, 84, 52, 0.42);
+  --tint-b: rgba(58, 84, 128, 0.42);
+  --tint-c: rgba(164, 162, 155, 0.1);
+}
+
+/* ── GLASS: the tinted light behind everything ── */
+
+:root[data-style="glass"] { background: var(--glass-base); }
+:root[data-style="glass"] body { background: transparent; }
+:root[data-style="glass"] .sh-shell { background: transparent; }
+
+:root[data-style="glass"] body::before {
+  content: "";
+  position: fixed;
+  inset: -20vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38vmax 32vmax at 18% 22%, var(--tint-a), transparent 70%),
+    radial-gradient(42vmax 36vmax at 82% 30%, var(--tint-b), transparent 70%),
+    radial-gradient(46vmax 40vmax at 50% 88%, var(--tint-c), transparent 70%);
+  filter: blur(40px);
+  animation: sh-drift 48s ease-in-out infinite alternate;
+}
+@keyframes sh-drift {
+  to { transform: translate3d(4vmax, -3vmax, 0) rotate(8deg); }
+}
+
+/* ── GLASS: frosted surfaces ── */
+
+:root[data-style="glass"] .bg-void:not(.sh-shell) { background-color: var(--glass-void); }
+:root[data-style="glass"] :is(.bg-panel, [class*="bg-panel/"]) { background-color: var(--glass-panel); }
+:root[data-style="glass"] .bg-panel-raised { background-color: var(--glass-panel-raised); }
+/* a pale button sitting on the dark band must stay a solid button */
+:root[data-style="glass"] .bg-ink .bg-void { background-color: var(--void); -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+:root[data-style="glass"] :is(.bg-void, .bg-panel, .bg-panel-raised, .bg-stone, header, footer):not(.sh-shell) {
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+}
+
+/* the nav lifts off the top edge and floats */
+:root[data-style="glass"] header.sticky {
+  top: 12px;
+  margin: 12px 12px 0;
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-nav);
+  box-shadow: var(--glass-shadow);
+}
+
+:root[data-style="glass"] footer {
+  margin: 12px;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-card);
+  background: var(--glass-panel);
+}
+
+/* the three promises become separate frosted tiles */
+:root[data-style="glass"] .sh-cells {
+  background: transparent;
+  gap: 12px;
+  padding: 16px 12px;
+}
+:root[data-style="glass"] .sh-cells > * {
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-shadow);
+}
+
+/* the grey storefront band frosts over and rounds off */
+:root[data-style="glass"] .bg-stone {
+  background: rgba(164, 162, 155, 0.74);
+  margin: 0 12px;
+  border-radius: 28px;
+}
+
+/* the dark call-to-action band becomes a floating panel */
+:root[data-style="glass"] section.bg-ink {
+  margin: 12px;
+  border-radius: 28px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* photographs and product tiles soften */
+:root[data-style="glass"] :is(img.border, .sh-photo) {
+  border-radius: var(--radius-card);
+  border-color: var(--glass-edge);
+}
+:root[data-style="glass"] .sh-field {
+  background: var(--glass-panel-raised);
+  border-color: var(--glass-edge);
+}
+
+/* ── GLASS: type ── */
+
+:root[data-style="glass"] :is(h1, h2, h3) {
+  font-family: var(--font-display-stack);
+  text-transform: none;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  font-weight: 600;
+}
+
+/* =========================================================
+   THE SWITCH: print-layer sweep
+   uiStyle.ts animates a staircase clip-path on the new view,
+   so the new look is laid down layer by layer, bottom to top.
+   ========================================================= */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  clip-path: inset(100% 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-style="glass"] body::before { animation: none; }
+}

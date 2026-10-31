@@ -117,14 +117,14 @@ export function CustomQuote() {
                 href={whatsappLink(draft)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="inline-flex min-h-[48px] items-center gap-3 bg-ink px-6 font-mono text-[11px] uppercase tracking-[0.14em] text-void transition-opacity hover:opacity-85"
+                className="sh-btn inline-flex min-h-[48px] items-center gap-3 bg-ink px-6 font-mono text-[11px] uppercase tracking-[0.14em] text-void transition-opacity hover:opacity-85"
               >
                 Send on WhatsApp
                 <ArrowUpRight size={14} />
               </a>
               <a
                 href={`mailto:${SITE.email}?subject=Custom%20quote&body=${encodeURIComponent(draft)}`}
-                className="inline-flex min-h-[48px] items-center gap-3 border border-ink px-6 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
+                className="sh-btn inline-flex min-h-[48px] items-center gap-3 border border-ink px-6 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
               >
                 Send by email
               </a>
@@ -179,7 +179,7 @@ export function CustomQuote() {
                 href={whatsappLink(draft)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="inline-flex min-h-[44px] items-center gap-3 border border-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
+                className="sh-btn inline-flex min-h-[44px] items-center gap-3 border border-ink px-5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ink hover:text-void"
               >
                 {modelPending ? 'Send the model on WhatsApp' : 'Add a note on WhatsApp'}
                 <ArrowUpRight size={13} />

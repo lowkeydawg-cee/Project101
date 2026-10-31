@@ -57,7 +57,7 @@ export function StudioAnswers() {
             href={whatsappLink()}
             target="_blank"
             rel="noreferrer noopener"
-            className="mt-6 inline-flex min-h-[48px] items-center border border-ink px-6 font-mono text-[12px] uppercase tracking-[0.12em] text-ink transition-colors hover:bg-ink hover:text-void"
+            className="mt-6 sh-btn inline-flex min-h-[48px] items-center border border-ink px-6 font-mono text-[12px] uppercase tracking-[0.12em] text-ink transition-colors hover:bg-ink hover:text-void"
           >
             Ask on WhatsApp
           </a>
