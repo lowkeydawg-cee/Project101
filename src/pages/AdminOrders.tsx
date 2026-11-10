@@ -27,7 +27,28 @@ type Order = {
   estimated_ready: string | null
   location: string | null
   created_at: string
+  payment_status: PaymentStatus
+  payment_ref: string | null
+  momo_txn_id: string | null
+  paid_at: string | null
+  pay_by: string | null
   order_items: OrderItem[]
+}
+type PaymentStatus = 'awaiting_payment' | 'paid' | 'expired' | 'refunded'
+
+/** Unpaid orders past their deadline count as expired, even before any job tidies the table. */
+function effectivePayment(order: Order): PaymentStatus {
+  if (order.payment_status === 'awaiting_payment' && order.pay_by && new Date(order.pay_by) < new Date()) {
+    return 'expired'
+  }
+  return order.payment_status
+}
+
+const paymentLabel: Record<PaymentStatus, string> = {
+  awaiting_payment: 'Awaiting payment',
+  paid: 'Paid',
+  expired: 'Expired, not paid',
+  refunded: 'Refunded',
 }
 const statuses: {
   value: OrderStatus
@@ -67,6 +88,11 @@ export function AdminOrders() {
         estimated_ready,
         location,
         created_at,
+        payment_status,
+        payment_ref,
+        momo_txn_id,
+        paid_at,
+        pay_by,
         order_items (
           id,
           product_name,
@@ -108,6 +134,32 @@ export function AdminOrders() {
           ? { ...order, status }
           : order,
       ),
+    )
+    setSaving(null)
+  }
+  async function setPayment(order: Order, next: PaymentStatus, txnId: string) {
+    setSaving(order.id)
+    setError('')
+    const patch =
+      next === 'paid'
+        ? { payment_status: 'paid', momo_txn_id: txnId.trim() || order.payment_ref, paid_at: new Date().toISOString() }
+        : next === 'awaiting_payment'
+          ? {
+              payment_status: 'awaiting_payment',
+              momo_txn_id: null,
+              paid_at: null,
+              // reopening an expired order gives the customer a fresh 48 hours
+              pay_by: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+            }
+          : { payment_status: next }
+    const { error: updateError } = await supabase.from('orders').update(patch).eq('id', order.id)
+    if (updateError) {
+      setError(updateError.message)
+      setSaving(null)
+      return
+    }
+    setOrders((current) =>
+      current.map((o) => (o.id === order.id ? ({ ...o, ...patch } as Order) : o)),
     )
     setSaving(null)
   }
@@ -156,6 +208,13 @@ export function AdminOrders() {
           <h1 className="mt-3 font-mono text-3xl uppercase tracking-[-0.05em] text-ink">
             Orders
           </h1>
+          {!loading && (
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-dim">
+              {orders.filter((o) => effectivePayment(o) === 'awaiting_payment').length} awaiting payment
+              {' · '}
+              {orders.filter((o) => effectivePayment(o) === 'awaiting_payment' && o.payment_ref).length} with an ID to check
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -220,6 +279,12 @@ export function AdminOrders() {
                   </p>
                 </div>
               </div>
+              {/* PAYMENT */}
+              <PaymentRow
+                order={order}
+                saving={saving === order.id}
+                onSet={(next, txn) => void setPayment(order, next, txn)}
+              />
               {/* CUSTOMER + FULFILMENT */}
               <div className="grid border-b border-hairline md:grid-cols-2">
                 <div className="border-b border-hairline p-5 md:border-b-0 md:border-r sm:p-6">
@@ -393,4 +458,86 @@ export function AdminOrders() {
     </main>
   )
 }
+function PaymentRow({
+  order,
+  saving,
+  onSet,
+}: {
+  order: Order
+  saving: boolean
+  onSet: (next: PaymentStatus, txnId: string) => void
+}) {
+  const state = effectivePayment(order)
+  const [txn, setTxn] = useState(order.momo_txn_id ?? order.payment_ref ?? '')
+
+  return (
+    <div className="border-b border-hairline p-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink-dim">Payment</p>
+        <span
+          className={`border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] ${
+            state === 'paid' ? 'border-ink bg-ink text-void' : 'border-hairline text-ink'
+          }`}
+        >
+          {paymentLabel[state]}
+        </span>
+      </div>
+
+      {state === 'paid' ? (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="font-mono text-[10px] text-ink-dim">
+            MoMo ID {order.momo_txn_id || 'not recorded'}
+            {order.paid_at ? ` · marked paid ${new Date(order.paid_at).toLocaleString()}` : ''}
+          </p>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => onSet('awaiting_payment', '')}
+            className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-dim underline underline-offset-4 hover:text-ink disabled:opacity-50"
+          >
+            Undo
+          </button>
+        </div>
+      ) : (
+        <>
+          <p className="mt-3 font-mono text-[10px] leading-relaxed text-ink-dim">
+            {order.payment_ref
+              ? `Customer sent MoMo ID ${order.payment_ref}. Find it on your MoMo statement, check the amount is ${formatRWF(order.total)}, then mark paid.`
+              : `No transaction ID from the customer yet. ${
+                  state === 'expired' ? 'The payment window has closed.' : `Pay by ${order.pay_by ? new Date(order.pay_by).toLocaleString() : 'not set'}.`
+                }`}
+          </p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <input
+              value={txn}
+              onChange={(e) => setTxn(e.target.value)}
+              placeholder="MoMo transaction ID you confirmed"
+              disabled={saving}
+              className="min-h-[44px] flex-1 border border-hairline bg-transparent px-3 font-mono text-[10px] uppercase text-ink outline-none disabled:opacity-50"
+            />
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => onSet('paid', txn)}
+              className="min-h-[44px] border border-ink bg-ink px-5 font-mono text-[10px] uppercase tracking-[0.14em] text-void disabled:opacity-50"
+            >
+              Mark paid
+            </button>
+            {state === 'expired' && (
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => onSet('awaiting_payment', '')}
+                className="min-h-[44px] border border-hairline px-5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink disabled:opacity-50"
+              >
+                Reopen 48h
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default AdminOrders

@@ -20,6 +20,9 @@ export function Footer() {
             <li><Link href="/order-status" className="text-ink hover:text-signal-soft">Track an Order</Link></li>
             <li><Link href="/contact" className="text-ink hover:text-signal-soft">Contact</Link></li>
             <li><Link href="/about" className="text-ink hover:text-signal-soft">About</Link></li>
+            <li><Link href="/terms" className="text-ink hover:text-signal-soft">Terms of sale</Link></li>
+            <li><Link href="/returns" className="text-ink hover:text-signal-soft">Returns</Link></li>
+            <li><Link href="/privacy" className="text-ink hover:text-signal-soft">Privacy</Link></li>
           </ul>
         </div>
 

@@ -60,6 +60,7 @@ Run these once each in the Supabase SQL Editor:
 
 - [`supabase/orders-security.sql`](supabase/orders-security.sql) — server-side pricing, private customer details, admin-only access
 - [`supabase/quote-files.sql`](supabase/quote-files.sql) — the `quote-files` bucket that holds STL uploads from the custom quote form
+- [`supabase/launch-security-and-payments.sql`](supabase/launch-security-and-payments.sql) — the admin list (only listed accounts can read orders or edit products), plus MoMo payment tracking. Change the admin email at the top before running; the script refuses to run with the placeholder.
 
 Also turn **off** Authentication → Sign In / Providers → "Allow new users to sign up". Any signed-in account can read the orders table, so public signup must stay closed.
 

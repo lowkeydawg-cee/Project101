@@ -32,6 +32,10 @@ const answers = [
     a: `We reprint it. Tell us within seven days of collecting or receiving it, send a photo, and the replacement is on us.`,
   },
   {
+    q: 'How do I pay?',
+    a: `With MTN MoMo. After you place your order, your order page shows the amount and the number to pay. Send us the transaction ID from MTN's SMS and we start printing once it is in. Custom pieces take a 50% deposit before printing and the rest on collection.`,
+  },
+  {
     q: 'How do I get it?',
     a: `Collect it in ${SITE.city}, or we deliver inside ${SITE.city} for a flat ${SITE.deliveryFee.toLocaleString('en-US')} RWF. Outside ${SITE.city}, message us and we will work it out.`,
   },

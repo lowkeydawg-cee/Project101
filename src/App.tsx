@@ -21,6 +21,7 @@ import { RequireAuth } from '@/components/RequireAuth'
 import { OrderStatus } from '@/pages/OrderStatus'
 import { AdminOrders } from '@/pages/AdminOrders'
 import Checkout from '@/pages/Checkout'
+import { Privacy, Terms, Returns } from '@/pages/Legal'
 
 function AdminDashboardRoute() {
   return (
@@ -60,6 +61,9 @@ export function App() {
             {/* Information */}
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
+            <Route path="/privacy" component={Privacy} />
+            <Route path="/terms" component={Terms} />
+            <Route path="/returns" component={Returns} />
 
             {/* Admin */}
             <Route path="/admin/login">

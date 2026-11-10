@@ -3,6 +3,7 @@ import { Link, useSearch } from 'wouter'
 import { ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { OrderTracker } from '@/components/OrderTracker'
+import { PaymentPanel, type PaymentStatus } from '@/components/PaymentPanel'
 import { usePageMeta } from '@/lib/pageMeta'
 
 type OrderStatusValue =
@@ -18,6 +19,10 @@ type Order = {
   estimated_ready: string | null
   location: string | null
   delivery_method: string
+  total: number
+  payment_status: PaymentStatus
+  pay_by: string | null
+  payment_ref_sent: boolean
 }
 
 export function OrderStatus() {
@@ -60,6 +65,18 @@ export function OrderStatus() {
 
   return (
     <main className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+      {order?.payment_status === 'awaiting_payment' ? (
+        // Straight after checkout the only job is paying, so the big
+        // headline steps aside and the payment panel sits near the top.
+        <section className="border-b border-hairline pb-6 pt-2 sm:pb-8">
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink-dim">
+            Order / {order.order_number}
+          </p>
+          <h1 className="mt-3 font-mono text-[clamp(1.8rem,4.5vw,3.2rem)] uppercase leading-[0.9] tracking-[-0.06em] text-ink">
+            Order placed. Now pay.
+          </h1>
+        </section>
+      ) : (
       <section className="border-y border-hairline py-10 sm:py-14">
         <Link
           href="/"
@@ -88,8 +105,9 @@ export function OrderStatus() {
           </p>
         </div>
       </section>
+      )}
 
-      <section className="mt-10">
+      <section className="mt-6 sm:mt-10">
         {loading ? (
           <div className="border-y border-hairline p-10">
             <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink-dim">
@@ -110,6 +128,15 @@ export function OrderStatus() {
             </Link>
           </div>
         ) : (
+          <div className="flex flex-col gap-10">
+          <PaymentPanel
+            orderNumber={order.order_number}
+            total={order.total}
+            paymentStatus={order.payment_status}
+            payBy={order.pay_by}
+            refSent={order.payment_ref_sent}
+            onRefSent={() => setOrder({ ...order, payment_ref_sent: true })}
+          />
           <OrderTracker
             orderNumber={order.order_number}
             currentStage={order.status}
@@ -121,6 +148,7 @@ export function OrderStatus() {
             }
             location={order.location || 'Safehouse Studio / Kigali'}
           />
+          </div>
         )}
       </section>
 
