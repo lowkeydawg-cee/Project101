@@ -22,10 +22,10 @@ export const SITE = {
   email: 'hello@safehouse.rw',
 
   /** International format, no spaces, no plus. Used for the wa.me link. */
-  whatsapp: '250000000000',
+  whatsapp: '250783200122',
 
   /** Shown to humans. */
-  phoneDisplay: '+250 000 000 000',
+  phoneDisplay: '+250 783 200 122',
 
   city: 'Kigali',
   country: 'Rwanda',
