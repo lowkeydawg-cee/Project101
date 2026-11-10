@@ -71,11 +71,37 @@ export const MOMO = {
   payWindowHours: 48,
 } as const
 
+/**
+ * Social profiles. SAINT: paste the full link to each profile you run, for
+ * example 'https://www.instagram.com/safehouse.rw'. Leave a platform empty
+ * and it simply does not appear on the site, so there are never dead links.
+ */
 export const SOCIAL = {
-  /** TODO replace with the real profile. */
-  instagram: 'https://instagram.com/',
+  instagram: '',
+  tiktok: '',
+  facebook: '',
+  x: '',
+  youtube: '',
   whatsapp: SITE.whatsapp,
 } as const
+
+export interface SocialLink {
+  label: string
+  href: string
+}
+
+/** Every profile that has a link, plus WhatsApp, in display order. */
+export function socialLinks(): SocialLink[] {
+  const list: SocialLink[] = [
+    { label: 'Instagram', href: SOCIAL.instagram },
+    { label: 'TikTok', href: SOCIAL.tiktok },
+    { label: 'Facebook', href: SOCIAL.facebook },
+    { label: 'X', href: SOCIAL.x },
+    { label: 'YouTube', href: SOCIAL.youtube },
+  ].filter((s) => s.href.startsWith('https://'))
+  list.push({ label: 'WhatsApp', href: `https://wa.me/${SOCIAL.whatsapp}` })
+  return list
+}
 
 /** Pre-filled WhatsApp chat link. */
 export function whatsappLink(message?: string): string {

@@ -3,7 +3,7 @@ import { Eyebrow } from '@/components/Eyebrow'
 import { TextField, TextAreaField } from '@/components/FormField'
 import { Button } from '@/components/Button'
 import { sendInquiry } from '@/lib/notify'
-import { SITE, whatsappLink } from '@/lib/site'
+import { SITE, socialLinks, whatsappLink } from '@/lib/site'
 import { usePageMeta } from '@/lib/pageMeta'
 
 type State = 'idle' | 'sending' | 'sent' | 'failed'
@@ -130,6 +130,23 @@ export function Contact() {
           <p className="mt-2 text-ink">
             {SITE.city}, {SITE.country}
           </p>
+
+          {socialLinks().length > 1 && (
+            <>
+              <p className="font-mono-label mt-8 text-[11px] uppercase text-ink-dim">Follow the work</p>
+              <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+                {socialLinks()
+                  .filter((l) => l.label !== 'WhatsApp')
+                  .map((l) => (
+                    <li key={l.label}>
+                      <a href={l.href} target="_blank" rel="noreferrer noopener" className="text-ink underline underline-offset-4">
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </>
+          )}
 
           <p className="font-mono-label mt-8 text-[11px] uppercase text-ink-dim">Response time</p>
           <p className="mt-2 text-ink">Usually within one working day</p>

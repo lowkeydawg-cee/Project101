@@ -4,42 +4,10 @@
  * reads correctly to a screen reader.
  */
 
-import { SITE, whatsappLink } from '@/lib/site'
+import { Link } from 'wouter'
+import { whatsappLink } from '@/lib/site'
+import { FEATURED_FAQ, type Faq } from '@/data/faq'
 
-const answers = [
-  {
-    q: 'Will it look like the photo?',
-    a: `Yes, because it is the same file and the same machine. Printed objects carry fine horizontal layer lines, which are part of how they look and feel. On close pieces we send you a photo of your actual print before it leaves the studio.`,
-  },
-  {
-    q: 'How long does it take?',
-    a: `${SITE.leadTime} for catalogue pieces once the order is in. Custom work depends on size and complexity, and we tell you the date before you commit, not after.`,
-  },
-  {
-    q: 'Can the price change after I order?',
-    a: `No. The price you see is the price you pay. For custom work we quote once we have looked at your file, and that quote is what you are charged.`,
-  },
-  {
-    q: 'My 3D file might not be right.',
-    a: `Send it anyway. Most files that come to us need something: a hole closed, a wall thickened, a part rescaled. We check it, tell you plainly what it needs, and fix it before printing. If you have no file at all, describe the thing and we work from that.`,
-  },
-  {
-    q: 'Which material should I pick?',
-    a: `Tell us what the piece has to survive and we will choose. PLA for decorative work and anything that lives indoors. PETG when it needs to take heat, sun or a knock. Resin when the detail is finer than a printer nozzle can hold.`,
-  },
-  {
-    q: 'What if it arrives damaged or wrong?',
-    a: `We reprint it. Tell us within seven days of collecting or receiving it, send a photo, and the replacement is on us.`,
-  },
-  {
-    q: 'How do I pay?',
-    a: `With MTN MoMo. After you place your order, your order page shows the amount and the number to pay. Send us the transaction ID from MTN's SMS and we start printing once it is in. Custom pieces take a 50% deposit before printing and the rest on collection.`,
-  },
-  {
-    q: 'How do I get it?',
-    a: `Collect it in ${SITE.city}, or we deliver inside ${SITE.city} for a flat ${SITE.deliveryFee.toLocaleString('en-US')} RWF. Outside ${SITE.city}, message us and we will work it out.`,
-  },
-]
 
 export function StudioAnswers() {
   return (
@@ -68,22 +36,35 @@ export function StudioAnswers() {
         </div>
 
         <div className="sh-in border-t border-hairline">
-          {answers.map((item) => (
-            <details key={item.q} className="group border-b border-hairline">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 font-mono text-[15px] uppercase tracking-[-0.01em] text-ink marker:content-none">
-                {item.q}
-                <span
-                  aria-hidden="true"
-                  className="shrink-0 font-mono text-xl leading-none text-ink-dim transition-transform duration-200 group-open:rotate-45"
-                >
-                  +
-                </span>
-              </summary>
-              <p className="max-w-2xl pb-6 text-base leading-relaxed text-ink-dim">{item.a}</p>
-            </details>
+          {FEATURED_FAQ.map((item) => (
+            <FaqItem key={item.q} item={item} />
           ))}
+          <Link
+            href="/faq"
+            className="mt-6 inline-block font-mono text-[12px] uppercase tracking-[0.12em] text-ink underline underline-offset-4 hover:text-ink-dim"
+          >
+            All questions →
+          </Link>
         </div>
       </div>
     </section>
+  )
+}
+
+/** One question. Built on <details> so it opens without JavaScript and reads correctly to screen readers. */
+export function FaqItem({ item }: { item: Faq }) {
+  return (
+    <details className="group border-b border-hairline">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 font-mono text-[15px] uppercase tracking-[-0.01em] text-ink marker:content-none">
+        {item.q}
+        <span
+          aria-hidden="true"
+          className="shrink-0 font-mono text-xl leading-none text-ink-dim transition-transform duration-200 group-open:rotate-45"
+        >
+          +
+        </span>
+      </summary>
+      <p className="max-w-2xl pb-6 text-base leading-relaxed text-ink-dim">{item.a}</p>
+    </details>
   )
 }

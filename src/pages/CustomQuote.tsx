@@ -15,7 +15,6 @@ const materials = [
   'No preference',
   'PLA',
   'PETG',
-  'Resin (fine detail)',
 ]
 
 /** Uploads the STL so the quote email can carry a link to it. */

@@ -22,6 +22,7 @@ import { OrderStatus } from '@/pages/OrderStatus'
 import { AdminOrders } from '@/pages/AdminOrders'
 import Checkout from '@/pages/Checkout'
 import { Privacy, Terms, Returns } from '@/pages/Legal'
+import { Faq } from '@/pages/Faq'
 
 function AdminDashboardRoute() {
   return (
@@ -61,6 +62,7 @@ export function App() {
             {/* Information */}
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
+            <Route path="/faq" component={Faq} />
             <Route path="/privacy" component={Privacy} />
             <Route path="/terms" component={Terms} />
             <Route path="/returns" component={Returns} />
