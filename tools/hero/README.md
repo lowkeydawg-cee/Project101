@@ -1,3 +1,5 @@
+> Not in use right now. The homepage hero switched to the three-still scene in `src/components/ScrollScrubHero.tsx`. This folder is kept so the print clip can be rebuilt.
+
 # The hero clip
 
 The homepage hero is a Three.js scene rendered to frames and encoded as a

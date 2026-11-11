@@ -6,7 +6,6 @@ import { ProductGallery } from '@/components/ProductGallery'
 import { StudioAnswers } from '@/components/StudioAnswers'
 import { DetailBand } from '@/components/DetailBand'
 import { StudioTimelapse } from '@/components/StudioTimelapse'
-import { SignaturePiece } from '@/components/SignaturePiece'
 import { SITE } from '@/lib/site'
 import { usePageMeta } from '@/lib/pageMeta'
 
@@ -87,8 +86,6 @@ export function Home() {
       </section>
 
       <StudioTimelapse />
-
-      <SignaturePiece />
 
       <ProductGallery products={products} loading={loading} />
 
