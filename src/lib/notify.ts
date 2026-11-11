@@ -10,6 +10,8 @@
  * or undo an order.
  */
 
+import { momoInstructions } from './momo'
+
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined
 const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string | undefined
 const ADMIN_TEMPLATE = import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID as string | undefined
@@ -69,6 +71,8 @@ export async function sendOrderEmails(order: OrderEmail): Promise<void> {
     delivery_fee: order.deliveryFee ? rwf(order.deliveryFee) : 'Free',
     total: rwf(order.total),
     status_link: `${window.location.origin}/order-status?order=${order.orderNumber}`,
+    // Add {{payment_instructions}} to the customer email template to show this.
+    payment_instructions: momoInstructions(order.orderNumber, order.total),
   }
 
   const jobs: Promise<void>[] = []

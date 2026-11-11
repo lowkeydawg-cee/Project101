@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useLocation } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import { useCart } from '@/context/CartContext'
 import { supabase } from '@/lib/supabase'
 import { formatRWF } from '@/lib/format'
@@ -207,12 +207,20 @@ export default function Checkout() {
             </p>
           </div>
         )}
+        <p className="text-sm leading-relaxed text-ink-dim">
+          You pay with MTN MoMo on the next screen. We start printing once the
+          payment is in, and unpaid orders are released after 48 hours. By
+          placing the order you agree to our{' '}
+          <Link href="/terms" className="text-ink underline underline-offset-4">terms of sale</Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="text-ink underline underline-offset-4">privacy policy</Link>.
+        </p>
         <button
           type="submit"
           disabled={submitting}
           className="border border-ink bg-ink px-5 py-4 font-mono text-xs uppercase text-panel transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? 'Placing order...' : 'Place order'}
+          {submitting ? 'Placing order...' : 'Place order and pay'}
         </button>
       </form>
     </main>

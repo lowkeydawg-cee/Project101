@@ -1,5 +1,5 @@
 import { Link } from 'wouter'
-import { SITE, SOCIAL } from '@/lib/site'
+import { SITE, socialLinks } from '@/lib/site'
 
 export function Footer() {
   return (
@@ -18,8 +18,12 @@ export function Footer() {
             <li><Link href="/shop" className="text-ink hover:text-signal-soft">Shop</Link></li>
             <li><Link href="/custom-quote" className="text-ink hover:text-signal-soft">Custom Orders</Link></li>
             <li><Link href="/order-status" className="text-ink hover:text-signal-soft">Track an Order</Link></li>
+            <li><Link href="/faq" className="text-ink hover:text-signal-soft">Questions</Link></li>
             <li><Link href="/contact" className="text-ink hover:text-signal-soft">Contact</Link></li>
             <li><Link href="/about" className="text-ink hover:text-signal-soft">About</Link></li>
+            <li><Link href="/terms" className="text-ink hover:text-signal-soft">Terms of sale</Link></li>
+            <li><Link href="/returns" className="text-ink hover:text-signal-soft">Returns</Link></li>
+            <li><Link href="/privacy" className="text-ink hover:text-signal-soft">Privacy</Link></li>
           </ul>
         </div>
 
@@ -40,26 +44,13 @@ export function Footer() {
         <div>
           <p className="font-mono-label text-[11px] uppercase text-ink-dim">Elsewhere</p>
           <ul className="mt-3 space-y-2 text-sm">
-            <li>
-              <a
-                href={SOCIAL.instagram}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-ink hover:text-signal-soft"
-              >
-                Instagram
-              </a>
-            </li>
-            <li>
-              <a
-                href={`https://wa.me/${SOCIAL.whatsapp}`}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-ink hover:text-signal-soft"
-              >
-                WhatsApp
-              </a>
-            </li>
+            {socialLinks().map((l) => (
+              <li key={l.label}>
+                <a href={l.href} target="_blank" rel="noreferrer noopener" className="text-ink hover:text-signal-soft">
+                  {l.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

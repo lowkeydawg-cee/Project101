@@ -37,11 +37,71 @@ export const SITE = {
   deliveryFee: 2000,
 } as const
 
+/**
+ * Facts the legal pages state. Leave a field empty until it is true: the
+ * pages only mention a TIN or an NCSA registration once you fill it in.
+ */
+export const LEGAL = {
+  /** Business name as registered with RDB. */
+  registeredName: 'The Safehouse (Domus Tuta)',
+  /** TIN from your RDB registration. TODO after registering. */
+  tin: '',
+  /** NCSA data controller certificate number. TODO once issued. */
+  ncsaCertificate: '',
+  /** Date the policies below last changed. */
+  updated: '10 November 2026',
+} as const
+
+/**
+ * Where customers pay. MTN MoMo only for now.
+ *
+ * SAINT: put your business MoMo number and the name MoMo shows when someone
+ * pays it. Customers compare that name before confirming, so it must match.
+ * When MTN gives you a MoMo Pay merchant code, add it to `merchantCode` and
+ * the pay button switches to it by itself.
+ */
+export const MOMO = {
+  /** As the customer would type it, e.g. 0788123456. TODO real number. */
+  number: '',
+  /** The name MoMo shows on the confirmation screen. Optional: leave empty to hide the name check. */
+  accountName: '',
+  /** MoMo Pay merchant code. When set, customers pay this instead of the number. */
+  merchantCode: '653291',
+  /** Hours a customer has to pay before the order is released. Matches the database. */
+  payWindowHours: 48,
+} as const
+
+/**
+ * Social profiles. SAINT: paste the full link to each profile you run, for
+ * example 'https://www.instagram.com/safehouse.rw'. Leave a platform empty
+ * and it simply does not appear on the site, so there are never dead links.
+ */
 export const SOCIAL = {
-  /** TODO replace with the real profile. */
-  instagram: 'https://instagram.com/',
+  instagram: '',
+  tiktok: '',
+  facebook: '',
+  x: '',
+  youtube: '',
   whatsapp: SITE.whatsapp,
 } as const
+
+export interface SocialLink {
+  label: string
+  href: string
+}
+
+/** Every profile that has a link, plus WhatsApp, in display order. */
+export function socialLinks(): SocialLink[] {
+  const list: SocialLink[] = [
+    { label: 'Instagram', href: SOCIAL.instagram },
+    { label: 'TikTok', href: SOCIAL.tiktok },
+    { label: 'Facebook', href: SOCIAL.facebook },
+    { label: 'X', href: SOCIAL.x },
+    { label: 'YouTube', href: SOCIAL.youtube },
+  ].filter((s) => s.href.startsWith('https://'))
+  list.push({ label: 'WhatsApp', href: `https://wa.me/${SOCIAL.whatsapp}` })
+  return list
+}
 
 /** Pre-filled WhatsApp chat link. */
 export function whatsappLink(message?: string): string {
