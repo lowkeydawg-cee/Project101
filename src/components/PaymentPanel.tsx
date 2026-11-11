@@ -140,8 +140,12 @@ export function PaymentPanel({ orderNumber, total, paymentStatus, payBy, refSent
             <Copy size={12} aria-hidden="true" /> {copied ? 'Copied' : 'Copy'}
           </button>
         </dd>
-        <dt className="text-ink-dim">Name shown</dt>
-        <dd className="text-ink">{MOMO.accountName}</dd>
+        {MOMO.accountName && (
+          <>
+            <dt className="text-ink-dim">Name shown</dt>
+            <dd className="text-ink">{MOMO.accountName}</dd>
+          </>
+        )}
         <dt className="text-ink-dim">Pay by</dt>
         <dd className="text-ink">{deadline(payBy)}</dd>
       </dl>
@@ -155,7 +159,11 @@ export function PaymentPanel({ orderNumber, total, paymentStatus, payBy, refSent
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-dim">
         On your phone this opens MoMo with the amount filled in: <span className="font-mono text-ink">{momoDialCode(total)}</span>.
         Or dial <span className="font-mono text-ink">*182#</span>, choose {MOMO.merchantCode ? 'Pay' : 'Send money'}, and enter the {MOMO.merchantCode ? 'merchant code' : 'MoMo number'} and amount above.
-        Check the name says <span className="text-ink">{MOMO.accountName}</span> before you confirm.
+        {MOMO.accountName ? (
+          <> Check the name says <span className="text-ink">{MOMO.accountName}</span> before you confirm.</>
+        ) : (
+          <> Check the amount matches before you confirm.</>
+        )}
       </p>
 
       <div className="mt-8 border-t border-hairline pt-6">

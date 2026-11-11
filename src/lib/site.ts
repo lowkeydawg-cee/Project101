@@ -62,11 +62,11 @@ export const LEGAL = {
  */
 export const MOMO = {
   /** As the customer would type it, e.g. 0788123456. TODO real number. */
-  number: '0780000000',
-  /** The name MoMo shows on the confirmation screen. TODO real name. */
-  accountName: 'Account name as MoMo shows it',
-  /** MoMo Pay merchant code, once MTN issues it. Leave empty until then. */
-  merchantCode: '',
+  number: '',
+  /** The name MoMo shows on the confirmation screen. Optional: leave empty to hide the name check. */
+  accountName: '',
+  /** MoMo Pay merchant code. When set, customers pay this instead of the number. */
+  merchantCode: '653291',
   /** Hours a customer has to pay before the order is released. Matches the database. */
   payWindowHours: 48,
 } as const

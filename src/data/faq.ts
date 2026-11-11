@@ -78,7 +78,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       },
       {
         q: 'How do I pay?',
-        a: `With MTN MoMo. After you place your order, your order page shows the amount and the number to pay. Send us the transaction ID from MTN's SMS and we start printing once it is in.`,
+        a: `With MTN MoMo. After you place your order, your order page shows the amount and our MoMo Pay merchant code. Dial it and pay in a few seconds. Send us the transaction ID from MTN's SMS and we start printing once it is in.`,
         featured: true,
       },
       {

@@ -8,8 +8,10 @@ import { MOMO } from './site'
  * the owner marks the order paid in admin after checking his MoMo statement.
  */
 
-/** False while the number in site.ts is still the placeholder. */
-export const momoReady = MOMO.number !== '0780000000' && !MOMO.accountName.startsWith('Account name')
+/** True once there is a merchant code or a MoMo number to pay. */
+export const momoReady = Boolean(MOMO.merchantCode || MOMO.number)
+
+const nameSuffix = MOMO.accountName ? ` (${MOMO.accountName})` : ''
 
 /**
  * The USSD string that opens MTN MoMo with the payee and amount filled in.
@@ -34,8 +36,8 @@ export function momoTelHref(amount: number): string {
 /** Who the customer is paying, in words, for the written steps. */
 export function momoPayeeLine(): string {
   return MOMO.merchantCode
-    ? `MoMo Pay merchant code ${MOMO.merchantCode} (${MOMO.accountName})`
-    : `MTN MoMo number ${MOMO.number} (${MOMO.accountName})`
+    ? `MoMo Pay merchant code ${MOMO.merchantCode}${nameSuffix}`
+    : `MTN MoMo number ${MOMO.number}${nameSuffix}`
 }
 
 /** Plain-text instructions, for emails and WhatsApp. */
