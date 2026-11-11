@@ -15,8 +15,8 @@ export const SITE = {
   description:
     'The Safehouse is a Kigali 3D printing studio. Wall art, figurines, tealight modules and custom parts, printed to order and collected in Kigali or delivered.',
 
-  /** Live address of the site. Update when a custom domain is connected. */
-  url: 'https://project101-puce.vercel.app',
+  /** Live address of the site. Change this if the domain ever changes, along with index.html and public/sitemap.xml. */
+  url: 'https://www.safehouse.rw',
 
   /** TODO replace with a mailbox you actually read. */
   email: 'hello@safehouse.rw',
