@@ -3,7 +3,7 @@
 Online storefront for **The Safehouse (Domus Tuta)** — a 3D printing studio in Kigali, Rwanda.
 Customers browse made-to-order printed objects, order online, request custom prints, and track their order; the owner manages products and orders from a private admin dashboard.
 
-**Live site:** https://project101-puce.vercel.app
+**Live site:** https://www.safehouse.rw (also at https://project101-puce.vercel.app)
 
 ## Features
 
