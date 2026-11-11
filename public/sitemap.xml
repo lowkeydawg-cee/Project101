@@ -26,22 +26,22 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://project101-puce.vercel.app/faq</loc>
+    <loc>https://www.safehouse.rw/faq</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://project101-puce.vercel.app/terms</loc>
+    <loc>https://www.safehouse.rw/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://project101-puce.vercel.app/returns</loc>
+    <loc>https://www.safehouse.rw/returns</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://project101-puce.vercel.app/privacy</loc>
+    <loc>https://www.safehouse.rw/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
