@@ -17,7 +17,7 @@ export function NavBar() {
   const { itemCount } = useCart()
 
   return (
-    <><header className="sticky top-0 z-40 border-b border-hairline bg-void/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-hairline bg-void/90 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <Link
           href="/"
@@ -95,6 +95,6 @@ export function NavBar() {
           </div>
         </div>
       )}
-    </header></>
+    </header>
   )
 }

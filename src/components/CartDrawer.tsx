@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Link } from 'wouter'
 import { useCart } from '@/context/CartContext'
+import { formatRWF } from '@/lib/format'
 
 export function CartDrawer() {
   const {
@@ -11,10 +13,22 @@ export function CartDrawer() {
     subtotal,
   } = useCart()
 
+  useEffect(() => {
+    if (!isOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [isOpen, setIsOpen])
+
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Your cart"
+      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm"
+    >
       <button
         type="button"
         aria-label="Close cart"
@@ -55,7 +69,7 @@ export function CartDrawer() {
                     </h4>
 
                     <p className="mt-1 text-xs text-ink-dim">
-                      RWF {line.product.price.toLocaleString()} each
+                      {formatRWF(line.product.price)} each
                     </p>
                   </div>
 
@@ -63,6 +77,7 @@ export function CartDrawer() {
                     <div className="flex items-center border border-hairline">
                       <button
                         type="button"
+                        aria-label={`Decrease quantity of ${line.product.name}`}
                         onClick={() =>
                           setQuantity(
                             line.product.id,
@@ -80,6 +95,7 @@ export function CartDrawer() {
 
                       <button
                         type="button"
+                        aria-label={`Increase quantity of ${line.product.name}`}
                         onClick={() =>
                           setQuantity(
                             line.product.id,
@@ -111,7 +127,7 @@ export function CartDrawer() {
             <span>TOTAL:</span>
 
             <span className="text-lg font-bold">
-              RWF {subtotal.toLocaleString()}
+              {formatRWF(subtotal)}
             </span>
           </div>
 

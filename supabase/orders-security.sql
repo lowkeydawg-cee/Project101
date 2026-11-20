@@ -179,23 +179,6 @@ revoke all on function public.place_order(text, text, text, text, text, jsonb) f
 grant execute on function public.place_order(text, text, text, text, text, jsonb) to anon, authenticated;
 
 -- get_order_status -----------------------------------------------------
-create or replace function public.get_order_status(p_order_number text)
-returns table (
-  order_number text,
-  status text,
-  estimated_ready text,
-  location text,
-  delivery_method text
-)
-language sql
-security definer
-set search_path = public
-as $$
-  select o.order_number, o.status, o.estimated_ready, o.location, o.delivery_method
-  from orders o
-  where o.order_number = upper(trim(p_order_number))
-  limit 1;
-$$;
-
-revoke all on function public.get_order_status(text) from public;
-grant execute on function public.get_order_status(text) to anon, authenticated;
+-- The full version — which also returns total, payment_status, pay_by and
+-- payment_ref_sent — is defined in launch-security-and-payments.sql.
+-- Run that script after this one. It drops and replaces this function.

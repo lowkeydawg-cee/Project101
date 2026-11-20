@@ -3,6 +3,7 @@ import { Link } from 'wouter'
 import { ArrowUpRight, Package, RefreshCw, ShoppingBag } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getProducts, type Product } from '@/data/products'
+import { formatRWF } from '@/lib/format'
 
 type Order = {
   id: string
@@ -11,10 +12,6 @@ type Order = {
   total: number
   status: string
   created_at: string
-}
-
-function formatRWF(value: number) {
-  return `${value.toLocaleString('en-US')} RWF`
 }
 
 function statusLabel(status: string) {

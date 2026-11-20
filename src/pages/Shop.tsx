@@ -11,10 +11,13 @@ export function Shop() {
   const [active, setActive] = useState<string | null>(null)
 
   useEffect(() => {
+    let active = true
     getProducts().then((data) => {
+      if (!active) return
       setProducts(data)
       setLoading(false)
     })
+    return () => { active = false }
   }, [])
 
   const categories = Array.from(

@@ -46,7 +46,7 @@ export function Cart() {
               href="/shop"
               className={`${buttonClass('primary')} mt-8 inline-flex items-center gap-3`}
             >
-             Browse the pieces
+              Browse the pieces
               <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
 
@@ -105,7 +105,7 @@ export function Cart() {
             "
           >
             <ArrowLeft size={12} aria-hidden="true" />
-           Keep looking
+            Keep looking
           </Link>
 
         </div>
@@ -358,7 +358,7 @@ export function Cart() {
 
                   <div className="flex justify-between gap-4">
                     <span className="text-ink-dim">Payment</span>
-                    <span className="text-ink">Coming soon</span>
+                    <span className="text-ink">MTN MoMo</span>
                   </div>
 
                 </div>

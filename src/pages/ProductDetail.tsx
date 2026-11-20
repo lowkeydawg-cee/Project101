@@ -15,10 +15,13 @@ export function ProductDetail() {
 
   useEffect(() => {
     if (!slug) return
+    let active = true
     getProductBySlug(slug).then((data) => {
+      if (!active) return
       setProduct(data)
       setLoading(false)
     })
+    return () => { active = false }
   }, [slug])
 
   const { addItem } = useCart()
@@ -373,7 +376,7 @@ export function ProductDetail() {
               {[
                 ['Ready in', `${SITE.leadTime} from order`],
                 ['Collection', `Free from the studio in ${SITE.city}`],
-                ['Delivery', `${SITE.deliveryFee.toLocaleString('en-US')} RWF inside ${SITE.city}`],
+                ['Delivery', `${formatRWF(SITE.deliveryFee)} inside ${SITE.city}`],
                 ['If it arrives wrong', 'We reprint it, free, within 7 days'],
               ].map(([k, v]) => (
                 <div

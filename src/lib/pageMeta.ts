@@ -1,6 +1,17 @@
 import { useEffect } from 'react'
 import { SITE } from './site'
 
+function setMeta(selector: string, attr: string, value: string) {
+  let tag = document.querySelector(selector)
+  if (!tag) {
+    tag = document.createElement('meta')
+    const [a, v] = selector.match(/\[([^\]=]+)="([^"]+)"\]/)!.slice(1)
+    tag.setAttribute(a, v)
+    document.head.appendChild(tag)
+  }
+  tag.setAttribute(attr, value)
+}
+
 /**
  * Gives each route its own title and description.
  *
@@ -10,17 +21,20 @@ import { SITE } from './site'
  */
 export function usePageMeta(title: string, description?: string) {
   useEffect(() => {
-    document.title = title ? `${title} · ${SITE.name}` : `${SITE.name} · ${SITE.tagline}`
+    const fullTitle = title
+      ? `${title} · ${SITE.name}`
+      : `${SITE.name} · ${SITE.tagline}`
+
+    document.title = fullTitle
 
     if (description) {
-      let tag = document.querySelector('meta[name="description"]')
-      if (!tag) {
-        tag = document.createElement('meta')
-        tag.setAttribute('name', 'description')
-        document.head.appendChild(tag)
-      }
-      tag.setAttribute('content', description)
+      setMeta('meta[name="description"]', 'content', description)
+      setMeta('meta[property="og:description"]', 'content', description)
+      setMeta('meta[name="twitter:description"]', 'content', description)
     }
+
+    setMeta('meta[property="og:title"]', 'content', fullTitle)
+    setMeta('meta[name="twitter:title"]', 'content', fullTitle)
 
     let link = document.querySelector('link[rel="canonical"]')
     if (!link) {

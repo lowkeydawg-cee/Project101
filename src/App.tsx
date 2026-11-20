@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from 'react'
 import { CartProvider } from '@/context/CartContext'
 import { AuthProvider } from '@/context/AuthContext'
 import { CartDrawer } from '@/components/CartDrawer'
@@ -24,6 +25,34 @@ import Checkout from '@/pages/Checkout'
 import { Privacy, Terms, Returns } from '@/pages/Legal'
 import { Faq } from '@/pages/Faq'
 
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { error: null }
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="mx-auto max-w-2xl px-6 py-32 text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.16em] text-ink-dim">Something went wrong</p>
+          <p className="mt-4 font-mono text-sm text-ink">{this.state.error.message}</p>
+          <button
+            type="button"
+            onClick={() => this.setState({ error: null })}
+            className="mt-8 border border-ink px-5 py-3 font-mono text-xs uppercase tracking-[0.12em] text-ink transition-colors hover:bg-ink hover:text-void"
+          >
+            Try again
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function AdminDashboardRoute() {
   return (
     <RequireAuth>
@@ -33,7 +62,8 @@ function AdminDashboardRoute() {
 }
 
 export function App() {
-    return (
+  return (
+    <ErrorBoundary>
     <AuthProvider>
       <CartProvider>
       <div className="sh-shell relative flex min-h-screen flex-col bg-void text-ink">
@@ -89,7 +119,8 @@ export function App() {
         <CartDrawer />
         <Analytics />
       </div>
-          </CartProvider>
+      </CartProvider>
     </AuthProvider>
+    </ErrorBoundary>
   )
 }

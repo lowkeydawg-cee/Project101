@@ -10,6 +10,7 @@
  * or undo an order.
  */
 
+import { formatRWF } from './format'
 import { momoInstructions } from './momo'
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined
@@ -32,10 +33,6 @@ export interface OrderEmail {
   subtotal: number
   deliveryFee: number
   total: number
-}
-
-function rwf(amount: number) {
-  return `${amount.toLocaleString('en-US')} RWF`
 }
 
 async function send(templateId: string, params: Record<string, string>) {
@@ -65,11 +62,11 @@ export async function sendOrderEmails(order: OrderEmail): Promise<void> {
     delivery_method: order.deliveryMethod === 'delivery' ? 'Delivery' : 'Pickup',
     delivery_address: order.deliveryAddress ?? 'Not given',
     items: order.items
-      .map((i) => `${i.quantity} × ${i.name} · ${rwf(i.unit_price * i.quantity)}`)
+      .map((i) => `${i.quantity} × ${i.name} · ${formatRWF(i.unit_price * i.quantity)}`)
       .join('\n'),
-    subtotal: rwf(order.subtotal),
-    delivery_fee: order.deliveryFee ? rwf(order.deliveryFee) : 'Free',
-    total: rwf(order.total),
+    subtotal: formatRWF(order.subtotal),
+    delivery_fee: order.deliveryFee ? formatRWF(order.deliveryFee) : 'Free',
+    total: formatRWF(order.total),
     status_link: `${window.location.origin}/order-status?order=${order.orderNumber}`,
     // Add {{payment_instructions}} to the customer email template to show this.
     payment_instructions: momoInstructions(order.orderNumber, order.total),
