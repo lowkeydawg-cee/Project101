@@ -30,7 +30,7 @@ const STORAGE_KEY = 'safehouse-cart'
 
 function readStoredCart(): CartLine[] {
   try {
-    const stored = sessionStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(STORAGE_KEY)
 
     if (!stored) return []
 
@@ -53,7 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const next = updater(current)
 
       try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
       } catch {
         // Ignore storage errors.
       }
@@ -108,7 +108,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines([])
 
     try {
-      sessionStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(STORAGE_KEY)
     } catch {
       // Ignore storage errors.
     }

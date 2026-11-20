@@ -44,7 +44,8 @@ export function AdminDashboard() {
       supabase
         .from('orders')
         .select('id, order_number, customer_name, total, status, created_at')
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .limit(5),
     ])
 
     setProducts(productData)

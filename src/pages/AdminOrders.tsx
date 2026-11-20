@@ -60,6 +60,8 @@ const statuses: {
   { value: 'delivery', label: 'Out for delivery' },
   { value: 'delivered', label: 'Delivered' },
 ]
+const PAGE_SIZE = 25
+
 function formatRWF(value: number) {
   return `${Number(value || 0).toLocaleString('en-US')} RWF`
 }
@@ -68,10 +70,13 @@ export function AdminOrders() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [error, setError] = useState('')
-  const loadOrders = useCallback(async () => {
+  const [page, setPage] = useState(0)
+  const [total, setTotal] = useState<number | null>(null)
+  const loadOrders = useCallback(async (pageNum: number) => {
     setLoading(true)
     setError('')
-    const { data, error: ordersError } = await supabase
+    const from = pageNum * PAGE_SIZE
+    const { data, error: ordersError, count } = await supabase
       .from('orders')
       .select(`
         id,
@@ -99,8 +104,9 @@ export function AdminOrders() {
           quantity,
           unit_price
         )
-      `)
+      `, { count: 'exact' })
       .order('created_at', { ascending: false })
+      .range(from, from + PAGE_SIZE - 1)
     if (ordersError) {
       setOrders([])
       setError(ordersError.message)
@@ -108,11 +114,12 @@ export function AdminOrders() {
       return
     }
     setOrders((data ?? []) as Order[])
+    setTotal(count ?? null)
     setLoading(false)
   }, [])
   useEffect(() => {
-    void loadOrders()
-  }, [loadOrders])
+    void loadOrders(page)
+  }, [loadOrders, page])
   async function updateStatus(
     orderId: string,
     status: OrderStatus,
@@ -213,12 +220,13 @@ export function AdminOrders() {
               {orders.filter((o) => effectivePayment(o) === 'awaiting_payment').length} awaiting payment
               {' · '}
               {orders.filter((o) => effectivePayment(o) === 'awaiting_payment' && o.payment_ref).length} with an ID to check
+              {total !== null && ` · ${total} total`}
             </p>
           )}
         </div>
         <button
           type="button"
-          onClick={() => void loadOrders()}
+          onClick={() => void loadOrders(page)}
           disabled={loading}
           className="self-start border border-hairline px-4 py-2 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-dim transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -453,6 +461,31 @@ export function AdminOrders() {
               </div>
             </article>
           ))}
+        </div>
+      )}
+      {total !== null && total > PAGE_SIZE && (
+        <div className="mt-8 flex items-center justify-between border-t border-hairline pt-6 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-dim">
+          <p>
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total} orders
+          </p>
+          <div className="flex gap-6">
+            <button
+              type="button"
+              disabled={page === 0 || loading}
+              onClick={() => setPage((p) => p - 1)}
+              className="transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              ← Previous
+            </button>
+            <button
+              type="button"
+              disabled={(page + 1) * PAGE_SIZE >= total || loading}
+              onClick={() => setPage((p) => p + 1)}
+              className="transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
+            >
+              Next →
+            </button>
+          </div>
         </div>
       )}
     </main>

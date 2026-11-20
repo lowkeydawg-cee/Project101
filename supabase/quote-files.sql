@@ -25,8 +25,8 @@ create policy "quote files are readable"
   on storage.objects for select
   using (bucket_id = 'quote-files');
 
--- 4. Only a signed-in admin can clear old files out.
+-- 4. Only the admin can delete quote files.
 drop policy if exists "only admins remove quote files" on storage.objects;
 create policy "only admins remove quote files"
-  on storage.objects for delete
-  using (bucket_id = 'quote-files' and auth.role() = 'authenticated');
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'quote-files' and public.is_admin());

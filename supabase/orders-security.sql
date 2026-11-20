@@ -51,20 +51,18 @@ drop policy if exists "Authenticated manage orders" on public.orders;
 drop policy if exists "Public can create order items" on public.order_items;
 drop policy if exists "Public can read order items" on public.order_items;
 
--- New policies: admin only --------------------------------------------
+-- Admin access policies are intentionally NOT created here.
+-- With RLS enabled and no policy, the table is inaccessible to everyone
+-- except service-role and the security-definer functions below
+-- (place_order, get_order_status). That is the safe default.
+--
+-- Admin read/update/delete access is granted by
+-- launch-security-and-payments.sql, which also creates is_admin().
+-- Run that script after this one (changing the admin email at the top).
 drop policy if exists "Admin reads orders" on public.orders;
 drop policy if exists "Admin updates orders" on public.orders;
 drop policy if exists "Admin deletes orders" on public.orders;
 drop policy if exists "Admin reads order items" on public.order_items;
-
-create policy "Admin reads orders" on public.orders
-  for select to authenticated using (true);
-create policy "Admin updates orders" on public.orders
-  for update to authenticated using (true) with check (true);
-create policy "Admin deletes orders" on public.orders
-  for delete to authenticated using (true);
-create policy "Admin reads order items" on public.order_items
-  for select to authenticated using (true);
 
 -- place_order ----------------------------------------------------------
 create or replace function public.place_order(
@@ -110,6 +108,16 @@ begin
      or jsonb_array_length(p_items) = 0
      or jsonb_array_length(p_items) > 50 then
     raise exception 'Your cart is empty or invalid.';
+  end if;
+
+  -- Rate limit: max 5 orders per email address per 24 hours.
+  if (
+    select count(*)
+    from public.orders
+    where lower(customer_email) = lower(trim(p_customer_email))
+      and created_at > now() - interval '24 hours'
+  ) >= 5 then
+    raise exception 'Too many orders placed recently from this email address. Contact us on WhatsApp if you need help.';
   end if;
 
   v_fee := case when p_delivery_method = 'delivery' then 2000 else 0 end;
