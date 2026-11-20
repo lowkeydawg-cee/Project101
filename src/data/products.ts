@@ -31,6 +31,15 @@ function mapRow(row: any): Product {
   }
 }
 
+/**
+ * True when the product's picture is a preview render, not a photo of a real
+ * print. Preview renders live in public/products/preview. Upload a real photo
+ * in the admin page and this turns false on its own, so the label disappears.
+ */
+export function isPreviewImage(image: string): boolean {
+  return image.includes('/products/preview/')
+}
+
 /** True when the product has a real uploaded photo (not empty / placeholder). */
 export function hasProductImage(product: Pick<Product, 'image'>): boolean {
   return Boolean(product.image) && product.image.startsWith('http')

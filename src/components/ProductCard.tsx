@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Link } from 'wouter'
-import type { Product } from '@/data/products'
+import { isPreviewImage, type Product } from '@/data/products'
 import { formatRWF } from '@/lib/format'
 
 function prefersReducedMotion() {
@@ -9,6 +9,7 @@ function prefersReducedMotion() {
 
 export function ProductCard({ product, index }: { product: Product; index: number }) {
   const hasImage = Boolean(product.image) && product.image.startsWith('http')
+  const preview = hasImage && isPreviewImage(product.image)
   const frameRef = useRef<HTMLDivElement>(null)
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
@@ -78,18 +79,17 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           />
         )}
 
+        {preview && (
+          <div className="absolute right-4 top-4 bg-black/70 px-2 py-1 font-mono text-[8px] uppercase tracking-[0.16em] text-white/85">
+            Preview render
+          </div>
+        )}
+
         {/* Object number */}
         <div
-          className="
-            absolute
-            left-4
-            top-4
-            font-mono
-            text-[9px]
-            uppercase
-            tracking-[0.16em]
-            text-black
-          "
+          className={`absolute left-4 top-4 font-mono text-[9px] uppercase tracking-[0.16em] ${
+            hasImage ? 'bg-black/70 px-2 py-1 text-white/85' : 'text-black'
+          }`}
         >
           {product.category}
         </div>

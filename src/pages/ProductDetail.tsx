@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useLocation } from 'wouter'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
-import { getProductBySlug, type Product } from '@/data/products'
+import { getProductBySlug, isPreviewImage, type Product } from '@/data/products'
 import { formatRWF } from '@/lib/format'
 import { useCart } from '@/context/CartContext'
 import { SITE } from '@/lib/site'
@@ -75,6 +75,7 @@ export function ProductDetail() {
   }
 
   const hasImage = Boolean(product.image) && product.image.startsWith('http')
+  const preview = hasImage && isPreviewImage(product.image)
 
   return (
     <main className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
@@ -121,13 +122,7 @@ export function ProductDetail() {
             <img
               src={product.image}
               alt={product.name}
-              className="
-                h-full
-                min-h-[420px]
-                w-full
-                object-cover
-                lg:min-h-[720px]
-              "
+              className="absolute inset-0 h-full w-full bg-[#0b0b0a] object-contain"
             />
           ) : (
             <div
@@ -139,17 +134,19 @@ export function ProductDetail() {
           {/* Object label */}
           <div className="absolute left-5 top-5">
             <span
-              className="
-                font-mono
-                text-[9px]
-                uppercase
-                tracking-[0.16em]
-                text-ink
-              "
+              className={`font-mono text-[9px] uppercase tracking-[0.16em] ${
+                hasImage ? 'bg-black/70 px-2 py-1 text-white/85' : 'text-ink'
+              }`}
             >
               {product.catalogNo}
             </span>
           </div>
+
+          {preview && (
+            <div className="absolute right-5 top-5 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-white/85">
+              Preview render
+            </div>
+          )}
 
           {/* Image marker */}
           <div
@@ -209,6 +206,12 @@ export function ProductDetail() {
             <p className="max-w-md text-sm leading-7 text-ink-dim">
               {product.description}
             </p>
+            {preview && (
+              <p className="mt-5 max-w-md border-l border-hairline pl-4 font-mono text-[10px] uppercase leading-5 tracking-[0.12em] text-ink-dim">
+                The picture is a preview render. Your piece is printed to order,
+                so colour and finish can differ slightly.
+              </p>
+            )}
           </div>
 
           {/* Specifications */}
