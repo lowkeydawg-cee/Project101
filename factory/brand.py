@@ -29,6 +29,7 @@ FONTS = {
     "label":   "Jost-600.ttf",                    # titles, labels
     "serif":   "CormorantGaramond-SemiBold.ttf",  # Atelier names
     "mono":    "IBMPlexMono-Medium.ttf",          # catalogue numbers
+    "hand":    "Caveat-Regular.ttf",              # handwritten mixtape labels (SIL OFL)
 }
 _FC = {}
 def _font(fid):

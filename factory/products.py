@@ -294,9 +294,28 @@ def desk_set_display(**kw):
     return p
 
 from car import sports_car, sports_car_display
+from cassette_key import mixtape, mixtape_display
+from vinyl_player import record_player, record_player_display
 from court_kit import arena_court_print, arena_court_display, full_court_print, full_court_display
 
 CATALOG = {
+  "mixtape": dict(fn=mixtape, display=mixtape_display, name="Mixtape", code="SH-TY-005",
+      category="Desk", price=15000, slide3="profile", profile_caption="REAL CASSETTE SIZE · THE REELS TURN · SCAN TO PLAY",
+      headline="IT'S REGULAR.", custom="Your words, handwritten on the label",
+      colours="Black shell and stand · red label · white reels",
+      description="A cassette at real size, leaning on its own stand. Both reels really turn, your words are handwritten on the label, and the QR on the back opens your song.",
+      personalise={"title": dict(param="TITLE", label="Label text (handwritten)", max=16, required=True),
+                   "link": dict(param="LINK", label="Song link (Spotify, Deezer, YouTube, Apple Music)", max=300, required=True)},
+      shots=dict(hero=dict(az=-26, el=16), detail=dict(az=-6, el=10, zoom=1.55, tz=0.05), profile=dict(az=-80, el=6, zoom=1.1), back=dict(az=172, el=12, zoom=1.2))),
+  "record-player": dict(fn=record_player, display=record_player_display, name="Record Player Key", code="SH-TY-004",
+      category="Keychains", price=8000, slide3="profile", profile_caption="THE RECORD SPINS · THE ARM SWINGS · SCAN TO PLAY",
+      headline="YOUR SONG, ON YOUR KEYS.", custom="Your song title, artist and link",
+      colours="Black deck · red label · white tonearm",
+      description="A mini turntable for your keys. The record really spins and the tonearm swings onto it. Your song title and artist curve around the label, and the QR underneath opens the song on your phone.",
+      personalise={"title": dict(param="TITLE", label="Song title", max=24, required=True),
+                   "artist": dict(param="ARTIST", label="Artist", max=22, required=False),
+                   "link": dict(param="LINK", label="Song link (Spotify, Deezer, YouTube, Apple Music)", max=300, required=True)},
+      shots=dict(hero=dict(az=-32, el=36), detail=dict(az=-6, el=58, zoom=1.55, tx=-0.08, ty=0.0, tz=0.0), profile=dict(az=-14, el=10, zoom=1.2))),
   "arena-court": dict(fn=arena_court_print, display=arena_court_display, name="Arena Court", code="SH-TY-002",
       category="Toys", price=25000, slide3="profile", profile_caption="REAL COURT MARKINGS · WOVEN NET",
       headline="YOUR COURT. YOUR DESK.", custom="Choose the key colour",

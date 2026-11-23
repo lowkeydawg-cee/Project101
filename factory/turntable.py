@@ -10,7 +10,7 @@ from brand import lockup
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 W, H, FPS, SECONDS = 1080, 1350, 30, 6
-EL = {"arena-court": 24, "full-court": 30, "sports-car": 14, "signature-nameplate": 14, "brand-signature": 10, "card-holder": 20, "order-desk": 22, "wifi-stand": 20}
+EL = {"mixtape": 14, "mixtape-key": 36, "record-player": 34, "arena-court": 24, "full-court": 30, "sports-car": 14, "signature-nameplate": 14, "brand-signature": 10, "card-holder": 20, "order-desk": 22, "wifi-stand": 20}
 
 def overlay(slug, tmp):
     m = CATALOG[slug]; im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
