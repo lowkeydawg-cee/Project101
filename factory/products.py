@@ -293,7 +293,16 @@ def desk_set_display(**kw):
     _merge(p, nameplate(), [20, -30, 0])
     return p
 
+from car import sports_car, sports_car_display
+
 CATALOG = {
+  "sports-car": dict(fn=sports_car, display=sports_car_display, name="Safehouse GT", code="SH-TY-001",
+      category="Toys", price=12000, slide3="profile", profile_caption="NO SUPPORTS · NO COLOUR SWAPS · IT ROLLS",
+      headline="DESIGNED IN KIGALI. BUILT TO ROLL.", custom="Choose your colourway",
+      colours="Red body · black canopy and tyres · white rims",
+      description="An original pocket supercar, about 9 cm long. The wheels turn on real axles, the canopy lifts off, and every part is printed in solid colour, so nothing is painted to chip off.",
+      personalise={},
+      shots=dict(hero=dict(az=-38, el=16), detail=dict(az=-150, el=20, zoom=1.15), profile=dict(az=0, el=3))),
   "cafe-set": dict(fn=cafe_set_display, display=cafe_set_display, name="Café Set", code="SH-SET-001",
       category="Business", price=55000, slide3="stamp", stamp_where="ON EVERY PIECE",
       bundle=[dict(slug="wifi-stand", map={"ssid": "ssid", "password": "password"}),

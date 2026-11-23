@@ -19,7 +19,8 @@ from matplotlib.font_manager import FontProperties
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # ---- colours (filament) -------------------------------------------------
-COLOURS = {"black": "#1C1C1C", "white": "#F2F0EB", "grey": "#A4A29B"}
+COLOURS = {"black": "#1C1C1C", "white": "#F2F0EB", "grey": "#A4A29B",
+           "red": "#B3262E", "blue": "#24489A"}   # red/blue: toy line only (filament on hand)
 
 # ---- fonts (all SIL Open Font License: free for commercial products) ----
 FONTS = {
@@ -133,6 +134,8 @@ PART_COLOURS = {"body": "black", "code": "black", "panel": "white"}
 def part_colour(part):
     if part.startswith("prop_"):          # display-only props (never printed)
         return COLOURS["white"]
+    head = part.split("_")[0]
+    if head in COLOURS: return COLOURS[head]      # colour-named parts: "red_body", "white_rims"
     return COLOURS[PART_COLOURS.get(part, "grey")]
 
 # ---- printer --------------------------------------------------------------
