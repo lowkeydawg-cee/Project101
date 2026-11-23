@@ -1,9 +1,12 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useEffect, useMemo, type FormEvent } from 'react'
 import { useParams, Link, useLocation } from 'wouter'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import {
   getProductBySlug,
   isPreviewImage,
+  FILAMENT,
+  colourKey,
+  type ColourRole,
   type Personalisation,
   type Product,
 } from '@/data/products'
@@ -34,6 +37,38 @@ export function ProductDetail() {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [personalValues, setPersonalValues] = useState<Personalisation>({})
+  const [colours, setColours] = useState<Record<string, string>>({})
+  const [colourTick, setColourTick] = useState(0)
+
+  // Start every product on its standard colours.
+  useEffect(() => {
+    if (!product) return
+    setColours(Object.fromEntries(product.colours.map((r) => [r.role, r.default])))
+  }, [product])
+
+  const materialColours = useMemo(() => {
+    const out: Record<string, string> = {}
+    for (const r of product?.colours ?? []) {
+      const hex = FILAMENT[colours[r.role] ?? r.default]?.hex
+      if (hex) for (const m of r.materials) out[m] = hex
+    }
+    return out
+  }, [product, colours])
+
+  const pickColour = (roles: ColourRole[], role: string, colour: string) => {
+    setColours((prev) => {
+      const next = { ...prev, [role]: colour }
+      // Anything that must contrast with this part moves off the clashing colour.
+      for (const r of roles) {
+        if (r.avoid === role && next[r.role] === colour) {
+          next[r.role] = r.options.find((c) => c !== colour && c === r.default) ?? r.options.find((c) => c !== colour) ?? r.default
+        }
+      }
+      return next
+    })
+    setColourTick((t) => t + 1)
+    setAdded(false)
+  }
 
   usePageMeta(
     product?.name ?? 'Piece',
@@ -88,6 +123,7 @@ export function ProductDetail() {
       const v = (personalValues[field.key] ?? '').trim().slice(0, field.max)
       if (v) values[field.key] = v
     }
+    for (const r of product.colours) values[colourKey(r.role)] = colours[r.role] ?? r.default
     addItem(product, quantity, values)
     setAdded(true)
   }
@@ -137,6 +173,8 @@ export function ProductDetail() {
             productName={product.name}
             catalogNo={product.catalogNo}
             fallbackBackground={fallbackBackground}
+            materialColours={materialColours}
+            focusModel={colourTick}
           />
         </div>
 
@@ -214,6 +252,56 @@ export function ProductDetail() {
 
           {/* Order */}
           <form onSubmit={handleAcquire} className="p-6 sm:p-8 lg:p-10">
+
+            {/* Colours: one row per part the customer can recolour; the 3D view follows */}
+            {product.colours.length > 0 && (
+              <fieldset className="mb-8 flex flex-col gap-5">
+                <legend className="mb-4 font-mono text-[9px] uppercase tracking-[0.16em] text-ink-dim">
+                  Choose your colours
+                </legend>
+                {product.colours.map((r) => {
+                  const chosen = colours[r.role] ?? r.default
+                  const clash = r.avoid ? colours[r.avoid] : undefined
+                  return (
+                    <div key={r.role}>
+                      <div className="mb-2 flex items-baseline justify-between gap-4">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink">{r.label}</span>
+                        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-dim">{FILAMENT[chosen]?.label}</span>
+                      </div>
+                      <div className="flex gap-2" role="radiogroup" aria-label={`${r.label} colour`}>
+                        {r.options.map((c) => {
+                          const disabled = c === clash
+                          const selected = c === chosen
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              role="radio"
+                              aria-checked={selected}
+                              aria-label={`${FILAMENT[c].label}${disabled ? ' (same as ' + (product.colours.find((x) => x.role === r.avoid)?.label ?? '') + ')' : ''}`}
+                              disabled={disabled}
+                              onClick={() => pickColour(product.colours, r.role, c)}
+                              className={`flex h-11 w-11 items-center justify-center border transition-colors ${
+                                selected ? 'border-ink' : 'border-hairline hover:border-ink/50'
+                              } disabled:cursor-not-allowed disabled:opacity-30`}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className="block h-7 w-7 rounded-full border border-black/20"
+                                style={{ background: FILAMENT[c].hex }}
+                              />
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+                <p className="font-mono text-[9px] uppercase leading-5 tracking-[0.12em] text-ink-dim">
+                  The 3D view shows your colours. Photos show the standard colours.
+                </p>
+              </fieldset>
+            )}
 
             {/* Personalisation, one input per field the product defines */}
             {product.personalise.length > 0 && (

@@ -12,10 +12,22 @@ interface MediaSliderProps {
   productName: string
   catalogNo?: string
   fallbackBackground?: string
+  /** Material name -> hex. Recolours the 3D model live. */
+  materialColours?: Record<string, string>
+  /** Bump this number to bring the 3D view to the front (e.g. after a colour change). */
+  focusModel?: number
 }
 
-export function MediaSlider({ slides, productName, catalogNo, fallbackBackground }: MediaSliderProps) {
+/** glTF colours are linear; the palette is sRGB. */
+function hexToLinear(hex: string): [number, number, number, number] {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+  const lin = c.map((v) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)))
+  return [lin[0], lin[1], lin[2], 1]
+}
+
+export function MediaSlider({ slides, productName, catalogNo, fallbackBackground, materialColours, focusModel }: MediaSliderProps) {
   const [current, setCurrent] = useState(0)
+  const viewerRef = useRef<HTMLElement>(null)
   const [reducedMotion, setReducedMotion] = useState(false)
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
@@ -30,6 +42,30 @@ export function MediaSlider({ slides, productName, catalogNo, fallbackBackground
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [])
+
+  // Recolour the model's named materials, now and whenever the model (re)loads.
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mv = viewerRef.current as any
+    if (!mv || !materialColours) return
+    const apply = () => {
+      const materials = mv.model?.materials ?? []
+      for (const mat of materials) {
+        const hex = materialColours[mat.name]
+        if (hex) mat.pbrMetallicRoughness.setBaseColorFactor(hexToLinear(hex))
+      }
+    }
+    if (mv.model) apply()
+    mv.addEventListener('load', apply)
+    return () => mv.removeEventListener('load', apply)
+  }, [materialColours])
+
+  useEffect(() => {
+    if (!focusModel) return
+    const i = slides.findIndex((s) => s.type === 'model')
+    if (i >= 0) setCurrent(i)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusModel])
 
   if (slides.length === 0) {
     return (
@@ -146,6 +182,7 @@ export function MediaSlider({ slides, productName, catalogNo, fallbackBackground
           >
             {slide.type === 'model' ? (
               <model-viewer
+                ref={viewerRef}
                 src={slide.src}
                 alt={productName}
                 loading="lazy"

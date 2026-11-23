@@ -14,6 +14,7 @@ Output: out/orders/<order_number>/<n>-<slug>/{stl/, model.glb, raw/hero.png, job
 """
 import os, sys, json, re
 from products import CATALOG
+from colours import spec as colour_spec, material_colours
 import build
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -66,12 +67,16 @@ def run_item(order, n, item):
     except ValueError as e:                       # text too long, link too long ...
         return dict(item=tag, status="NEEDS CUSTOMER", reason=str(e))
     ok, rep = build.check(meshes)
+    chosen = {r["role"]: (given.get("colour_" + r["role"]) or r["default"]) for r in colour_spec(slug)}
+    for r in colour_spec(slug):
+        if chosen[r["role"]] not in r["options"]: chosen[r["role"]] = r["default"]
     job = dict(item=tag, product=meta["name"], quantity=item.get("quantity", 1), personalisation=over,
+               filament={r["label"]: chosen[r["role"]] for r in colour_spec(slug)},
                size_mm=rep["size_mm"], filament_g=round(rep["filament_g_estimate"] * item.get("quantity", 1), 1),
                warnings=rep["warnings"])
     if not ok:
         job.update(status="BLOCKED", reason="; ".join(rep["fails"])); return job
-    build.build_glb(build.display_for(slug, meshes, over), os.path.join(out, "model.glb"))
+    build.build_glb(build.display_for(slug, meshes, over), os.path.join(out, "model.glb"), material_colours(slug, chosen))
     shots = dict(hero=meta["shots"]["hero"])
     if meta.get("qr"):
         k = "scan" if "scan" in meta["shots"] else "detail"; shots[k] = meta["shots"][k]
@@ -104,7 +109,8 @@ def main(path):
             jobs.append(run_item(o, counters[o], p))
     print(f"\n{'ITEM':38} {'STATUS':20} DETAIL")
     for j in jobs:
-        detail = j.get("reason") or f"{j['filament_g']} g · {j['size_mm']} mm" + (f" · QR ✓" if j.get("qr_scan") else "")
+        detail = j.get("reason") or f"{j['filament_g']} g · {j['size_mm']} mm" + (f" · QR ✓" if j.get("qr_scan") else "") \
+            + ("  · " + ", ".join(f"{k}: {v}" for k, v in j.get("filament", {}).items()) if j.get("filament") else "")
         print(f"{j['item']:38} {j['status']:20} {detail}")
     total = sum(j.get("filament_g", 0) for j in jobs if j["status"] == "READY FOR APPROVAL")
     print(f"\nFilament for approved-ready items: ~{total:.0f} g PLA (rough estimate)")

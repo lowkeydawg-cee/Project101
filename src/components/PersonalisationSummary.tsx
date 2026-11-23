@@ -29,7 +29,8 @@ export function PersonalisationSummary({
       {entries.map(([key, value]) => (
         <div key={key} className="flex flex-wrap gap-x-2 font-mono text-[10px] leading-5">
           <dt className="uppercase tracking-[0.12em] text-ink-dim">
-            {fields?.find((f) => f.key === key)?.label ?? key} /
+            {fields?.find((f) => f.key === key)?.label ??
+              (key.startsWith('colour_') ? `${key.slice(7).replace(/^./, (c) => c.toUpperCase())} colour` : key)} /
           </dt>
           <dd className="break-all text-ink">{value}</dd>
         </div>

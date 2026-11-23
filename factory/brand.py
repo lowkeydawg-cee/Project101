@@ -137,7 +137,7 @@ def part_colour(part):
         return COLOURS["white"]
     head = part.split("_")[0]
     if head in COLOURS: return COLOURS[head]      # colour-named parts: "red_body", "white_rims"
-    return COLOURS[PART_COLOURS.get(part, "grey")]
+    return COLOURS[PART_COLOURS.get(part, "white")]       # grey retired: details default to white
 
 # ---- printer --------------------------------------------------------------
 PRINTER = {"name": "Bambu Lab A1", "bed_mm": (256, 256, 256), "nozzle_mm": 0.4}

@@ -18,7 +18,32 @@ export interface Product {
   glbUrl: string
   /** Fields the customer fills in before ordering. Empty when the column is missing. */
   personalise: PersonaliseField[]
+  /** Parts the customer can recolour. Empty when the product has no colour choices. */
+  colours: ColourRole[]
 }
+
+/** The filament on the shelf. Only these colours can ever be chosen. */
+export const FILAMENT: Record<string, { label: string; hex: string }> = {
+  black: { label: 'Black', hex: '#1C1C1C' },
+  white: { label: 'White', hex: '#F2F0EB' },
+  red: { label: 'Red', hex: '#B3262E' },
+  blue: { label: 'Blue', hex: '#24489A' },
+}
+
+export interface ColourRole {
+  /** Stable id, saved on the order as colour_<role>. */
+  role: string
+  label: string
+  /** Material names in the 3D model that this choice recolours. */
+  materials: string[]
+  default: string
+  options: string[]
+  /** Another role this one must not match (white lines on a white floor would vanish). */
+  avoid: string | null
+}
+
+/** Personalisation key that stores a colour choice. */
+export const colourKey = (role: string) => `colour_${role}`
 
 export interface PersonaliseField {
   key: string
@@ -59,6 +84,35 @@ function parsePersonalise(raw: unknown): PersonaliseField[] {
   return fields
 }
 
+// Same tolerance as parsePersonalise: bad entries are dropped, unknown colours ignored.
+function parseColours(raw: unknown): ColourRole[] {
+  let value = raw
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value)
+    } catch {
+      return []
+    }
+  }
+  if (!Array.isArray(value)) return []
+  const roles: ColourRole[] = []
+  for (const r of value) {
+    if (!r || typeof r !== 'object' || typeof r.role !== 'string') continue
+    const options = Array.isArray(r.options) ? r.options.filter((c: unknown) => typeof c === 'string' && c in FILAMENT) : []
+    if (options.length === 0) continue
+    const def = typeof r.default === 'string' && options.includes(r.default) ? r.default : options[0]
+    roles.push({
+      role: r.role,
+      label: typeof r.label === 'string' ? r.label : r.role,
+      materials: Array.isArray(r.materials) ? r.materials.filter((m: unknown) => typeof m === 'string') : [],
+      default: def,
+      options,
+      avoid: typeof r.avoid === 'string' ? r.avoid : null,
+    })
+  }
+  return roles
+}
+
 function parseGallery(raw: unknown, imageUrl: string): string[] {
   const urls = Array.isArray(raw)
     ? raw.filter((u): u is string => typeof u === 'string' && u.trim() !== '')
@@ -84,6 +138,7 @@ function mapRow(row: any): Product {
     gallery: parseGallery(row.gallery, row.image_url ?? ''),
     glbUrl: row.glb_url ?? '',
     personalise: parsePersonalise(row.personalise),
+    colours: parseColours(row.colours),
   }
 }
 

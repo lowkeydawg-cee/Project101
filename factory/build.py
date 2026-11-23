@@ -11,8 +11,9 @@ Outputs: out/<slug>/{stl/, model.glb, raw/, slides/, report.json, product.sql}
 Exit code 1 if any check FAILS (nothing gets published).
 """
 import os, sys, json, shutil, subprocess, argparse
+from colours import spec as colour_spec
 import numpy as np, trimesh
-from brand import part_colour, PRINTER
+from brand import part_colour, PRINTER, COLOURS
 from products import CATALOG
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -131,15 +132,17 @@ def check(meshes):
     return (not fails), dict(fails=fails, warnings=warns, **info)
 
 # ------------------------------------------------------------------ glb
-def build_glb(meshes, path):
+def build_glb(meshes, path, colours=None):
+    """colours: optional {part: colour name} override (a customer's choices)."""
     sc = trimesh.Scene()
     for part, m in meshes.items():
         m = m.copy(); m.apply_scale(0.001)
         m.apply_transform(trimesh.transformations.rotation_matrix(-np.pi / 2, [1, 0, 0]))
-        srgb = [int(part_colour(part)[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        hexc = COLOURS[colours[part]] if colours and part in colours else part_colour(part)
+        srgb = [int(hexc[i:i + 2], 16) / 255 for i in (1, 3, 5)]
         lin = [round(255 * (c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4)) for c in srgb]
         m.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(
-            baseColorFactor=lin + [255], roughnessFactor=0.85, metallicFactor=0.0))
+            name=part, baseColorFactor=lin + [255], roughnessFactor=0.85, metallicFactor=0.0))     # named: the site recolours by name
         sc.add_geometry(m, node_name=part)
     sc.export(path)
 
@@ -173,7 +176,8 @@ def product_sql(slug):
                          for k, v in m["personalise"].items()])) + "::jsonb"
     vals = dict(catalog_no=q(m["code"]), name=q(m["name"]), category=q(m["category"]), price=str(m["price"]),
                 description=q(m["description"]), material=q("PLA"), finish=q(m["colours"].replace(" · ", ", ")),
-                image_url=q(f"{base}/01.webp"), gallery=gallery, glb_url=q(f"{base}/model.glb"), personalise=pers)
+                image_url=q(f"{base}/01.webp"), gallery=gallery, glb_url=q(f"{base}/model.glb"), personalise=pers,
+                colours=q(json.dumps(colour_spec(slug))) + "::jsonb")
     sets = ",\n  ".join(f"{k} = {v}" for k, v in vals.items())
     cols = ", ".join(["slug"] + list(vals)); vs = ", ".join([q(slug)] + list(vals.values()))
     return (f"-- {m['name']} ({m['code']}). Run after the files are live on www.safehouse.rw.\n"
