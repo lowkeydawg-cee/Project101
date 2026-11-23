@@ -183,7 +183,9 @@ img {
 }
 
 .sh-tile .sh-photo { transition: background-color 0.3s, color 0.3s; }
-.sh-tile:hover .sh-photo { background-color: #0b0b0a; color: #f2f1eb; }
+@media (hover: hover) {
+  .sh-tile:hover .sh-photo[data-empty] { background-color: #0b0b0a; color: #f2f1eb; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .sh-up, .sh-blink, .sh-track, .sh-in,
@@ -256,6 +258,19 @@ img {
 :root[data-style="glass"] { background: var(--glass-base); }
 :root[data-style="glass"] body { background: transparent; }
 :root[data-style="glass"] .sh-shell { background: transparent; }
+
+/* =========================================================
+   MODEL VIEWER — suppress default chrome
+   ========================================================= */
+
+model-viewer::part(default-ar-button) { display: none; }
+model-viewer::part(interaction-prompt) { display: none; }
+model-viewer::part(default-progress-bar) {
+  height: 1px;
+  background: var(--ink-dim);
+  top: auto;
+  bottom: 0;
+}
 
 :root[data-style="glass"] body::before {
   content: "";

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'wouter'
 import { isPreviewImage, type Product } from '@/data/products'
 import { formatRWF } from '@/lib/format'
@@ -8,9 +8,21 @@ function prefersReducedMotion() {
 }
 
 export function ProductCard({ product, index }: { product: Product; index: number }) {
-  const hasImage = Boolean(product.image) && product.image.startsWith('http')
-  const preview = hasImage && isPreviewImage(product.image)
+  const primary = product.gallery[0] ?? product.image
+  const secondary = product.gallery[1]
+  const hasImage = Boolean(primary) && primary.startsWith('http')
+  const hasSecondary = typeof secondary === 'string' && secondary.startsWith('http')
+  const preview = hasImage && isPreviewImage(primary)
   const frameRef = useRef<HTMLDivElement>(null)
+  // The second image is only requested on the first mouse hover, so the grid
+  // loads exactly what it did before. Touch never triggers it.
+  const [armSecondary, setArmSecondary] = useState(false)
+  const [secondaryReady, setSecondaryReady] = useState(false)
+  const crossfade = hasSecondary && secondaryReady
+
+  function handlePointerEnter(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === 'mouse' && hasSecondary) setArmSecondary(true)
+  }
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (prefersReducedMotion()) return
@@ -36,6 +48,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
       {/* Object */}
       <div
         ref={frameRef}
+        onPointerEnter={handlePointerEnter}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         className="
@@ -44,7 +57,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           overflow-hidden
           border
           border-black/80
-          bg-[#f1f0ec]
+          bg-[#ECEAE8]
           transition-transform
           duration-200
           ease-out
@@ -52,19 +65,35 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
         "
       >
         {hasImage ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="
-              h-full
-              w-full
-              object-cover
-              transition-transform
-              duration-700
-              ease-[cubic-bezier(0.22,1,0.36,1)]
-              group-hover:scale-[1.035]
-            "
-          />
+          <>
+            <img
+              src={primary}
+              alt={product.name}
+              className={`
+                absolute inset-0 h-full w-full object-contain
+                transition-[transform,opacity] duration-500
+                ease-[cubic-bezier(0.22,1,0.36,1)]
+                motion-reduce:transition-none
+                ${crossfade ? 'group-hover:opacity-0' : 'group-hover:scale-[1.035]'}
+              `}
+            />
+            {hasSecondary && armSecondary && (
+              <img
+                src={secondary}
+                alt=""
+                aria-hidden="true"
+                decoding="async"
+                onLoad={() => setSecondaryReady(true)}
+                className={`
+                  absolute inset-0 h-full w-full object-contain
+                  opacity-0 transition-opacity duration-500
+                  ease-[cubic-bezier(0.22,1,0.36,1)]
+                  motion-reduce:transition-none
+                  ${crossfade ? 'group-hover:opacity-100' : ''}
+                `}
+              />
+            )}
+          </>
         ) : (
           <div
             className="
@@ -73,9 +102,10 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
               transition-transform
               duration-700
               ease-[cubic-bezier(0.22,1,0.36,1)]
+              motion-reduce:transition-none
               group-hover:scale-[1.035]
             "
-            style={{ background: product.image }}
+            style={{ background: primary }}
           />
         )}
 
@@ -107,7 +137,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
             justify-center
             border
             border-black
-            bg-[#f1f0ec]/90
+            bg-[#ECEAE8]/90
             font-mono
             text-sm
             text-black

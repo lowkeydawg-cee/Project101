@@ -35,7 +35,7 @@ export function ProductGallery({
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="aspect-[4/5] w-[clamp(240px,28vw,400px)] flex-none animate-pulse border border-[#0b0b0a]/25 bg-[#0b0b0a]/5"
+                  className="aspect-[4/3] w-[min(82vw,400px)] flex-none animate-pulse border border-[#0b0b0a]/25 bg-[#0b0b0a]/5 md:w-[clamp(240px,28vw,400px)]"
                 />
               ))}
             </div>
@@ -61,17 +61,24 @@ export function ProductGallery({
                 <Link
                   key={p.id}
                   href={`/shop/${p.slug}`}
-                  className="sh-tile block w-[clamp(240px,28vw,400px)] flex-none text-[#0b0b0a]"
+                  className="sh-tile block w-[min(82vw,400px)] flex-none text-[#0b0b0a] md:w-[clamp(240px,28vw,400px)]"
                 >
-                  <div className="sh-photo flex aspect-[4/5] items-center justify-center overflow-hidden border border-[#0b0b0a] p-5 text-center font-mono text-[11px] uppercase tracking-[0.14em]">
+                  <div
+                    className={`sh-photo aspect-[4/3] overflow-hidden border border-[#0b0b0a] bg-[#ECEAE8]${
+                      hasProductImage(p)
+                        ? ''
+                        : ' flex items-center justify-center p-5 text-center font-mono text-[11px] uppercase tracking-[0.14em]'
+                    }`}
+                    {...(!hasProductImage(p) ? { 'data-empty': '' } : {})}
+                  >
                     {hasProductImage(p) ? (
-                      <img src={p.image} alt={p.name} className="h-full w-full object-cover" loading="lazy" />
+                      <img src={p.image} alt={p.name} className="h-full w-full object-contain" loading="lazy" />
                     ) : (
                       'Photo coming soon'
                     )}
                   </div>
                   <div className="mt-4 flex justify-between gap-3">
-                    <span className="font-mono text-[17px] font-medium uppercase tracking-[-0.03em]">{p.name}</span>
+                    <span className="min-w-0 font-mono text-[17px] font-medium uppercase tracking-[-0.03em]">{p.name}</span>
                     <span className="whitespace-nowrap font-mono text-[13px]">{formatRWF(p.price)}</span>
                   </div>
                   <div className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.14em]">
