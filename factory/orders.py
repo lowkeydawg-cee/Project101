@@ -44,14 +44,16 @@ def run_item(order, n, item):
                warnings=rep["warnings"])
     if not ok:
         job.update(status="BLOCKED", reason="; ".join(rep["fails"])); return job
-    build.build_glb(meshes, os.path.join(out, "model.glb"))
+    build.build_glb(build.display_for(slug, meshes, over), os.path.join(out, "model.glb"))
     shots = dict(hero=meta["shots"]["hero"])
-    if meta.get("qr"): shots["detail"] = meta["shots"]["detail"]
+    if meta.get("qr"):
+        k = "scan" if "scan" in meta["shots"] else "detail"; shots[k] = meta["shots"][k]
     raw = os.path.join(out, "raw"); os.makedirs(raw, exist_ok=True)
     glb = os.path.relpath(os.path.join(out, "model.glb"), HERE)
     build.render([dict(glb=glb, out=os.path.join(raw, f"{k}.png"), **v) for k, v in shots.items()], out)
     if meta.get("qr"):
-        good, got = build.qr_check(os.path.join(raw, "detail.png"), over[meta["qr"]])
+        from products import with_defaults
+        good, got = build.qr_check(os.path.join(raw, ("scan" if "scan" in meta["shots"] else "detail") + ".png"), meta["qr"](with_defaults(meta["fn"], over)))
         job["qr_scan"] = got
         if not good:
             job.update(status="BLOCKED", reason=f"QR does not scan back to the customer's link (got {got!r})"); return job

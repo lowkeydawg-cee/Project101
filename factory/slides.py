@@ -29,7 +29,11 @@ def raster(man, colour, height_px, tmpdir):
     tmp = os.path.join(tmpdir, "_raster.png"); fig.savefig(tmp, transparent=True); plt.close(fig)
     return Image.open(tmp).convert("RGBA")
 
-def size_mm(stl_dir):
+def size_mm(stl_dir, meta=None):
+    if meta and meta.get("display"):                     # assembled size, not the print layout
+        bs = [m.bounding_box() for m in meta["display"]().values()]
+        lo = np.min([b[:3] for b in bs], 0); hi = np.max([b[3:] for b in bs], 0); e = hi - lo
+        return f"{e[0]:.0f} × {e[1]:.0f} × {e[2]:.0f} mm"
     b = np.vstack([trimesh.load(p).bounds for p in glob.glob(f"{stl_dir}/*.stl")]); e = b.max(0) - b.min(0)
     return f"{e[0]:.0f} × {e[1]:.0f} × {e[2]:.0f} mm"
 
@@ -69,7 +73,7 @@ def build_slides(slug, meta, raw, stl_dir, out):
         fs -= 2
     tracked(d, (x, 150), name.upper(), F("Jost-500.ttf", fs), INK, 0.22)
     tracked(d, (x, 222), code, F("IBMPlexMono-Medium.ttf", 26), GREY, 0.1)
-    rows = [("SIZE", size_mm(stl_dir)), ("MATERIAL", "Matte PLA, printed in Kigali"),
+    rows = [("SIZE", size_mm(stl_dir, meta)), ("MATERIAL", "Matte PLA, printed in Kigali"),
             ("COLOURS", meta["colours"]), ("MADE FOR YOU", meta["custom"])]
     y = 360
     for k, v in rows:

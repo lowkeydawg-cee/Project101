@@ -32,6 +32,16 @@ def build_stl(slug, out, overrides=None):
         t.export(os.path.join(d, f"{slug}_{part}.stl")); meshes[part] = t
     return meshes
 
+def display_for(slug, meshes, overrides=None):
+    """Meshes to show in renders / the 3D viewer: the assembled object when the print layout differs."""
+    fn = CATALOG[slug].get("display")
+    if not fn: return meshes
+    out = {}
+    for k, man in fn(**(overrides or {})).items():
+        mesh = man.to_mesh()
+        out[k] = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=True)
+    return out
+
 def props_for(slug, overrides=None):
     """Display-only meshes (e.g. cards in a holder) for renders and the 3D viewer. Never printed."""
     fn = CATALOG[slug].get("props")
@@ -89,6 +99,33 @@ def check(meshes):
         if area > 20:
             warns.append(f"{area:.0f} mm² of unsupported overhang > 45° (add supports or redesign)")
     info["filament_g_estimate"] = round(grams, 1)
+    # floating pieces: every separate piece must sit on the bed or on/inside other material
+    whole_f = trimesh.util.concatenate(list(meshes.values()))
+    rayf = trimesh.ray.ray_triangle.RayMeshIntersector(whole_f)
+    floating = 0
+    for part, m in meshes.items():
+        for comp in m.split(only_watertight=False):
+            zmin = comp.bounds[0][2]
+            if zmin <= 0.3:
+                continue
+            low = comp.vertices[comp.vertices[:, 2] < zmin + 0.05][:5]
+            # nudge samples 0.2 mm inward (toward the piece's centre) so they never sit exactly on a surface
+            v = comp.centroid[:2] - low[:, :2]; n = np.linalg.norm(v, axis=1, keepdims=True); n[n == 0] = 1
+            low = low.copy(); low[:, :2] += 0.2 * v / n; low[:, 2] -= 0.05
+            others = [o for n, o in meshes.items() if n != part]
+            held = any(o.contains(low).any() for o in meshes.values())
+            if not held:   # held from the side by another part at its lowest layer (inlays, multi-colour)
+                for dx, dy in [(d * sx, d * sy) for d in (0.3, 0.8, 1.3) for sx, sy in ((1, 0), (-1, 0), (0, 1), (0, -1))]:  # covers reliefs raised up to 1.2 mm
+                    side = low + [dx, dy, 0.05]
+                    if any(o.contains(side).any() for o in others):
+                        held = True; break
+            if not held:
+                loc, idx, _ = rayf.intersects_location(low, np.tile([0, 0, -1.0], (len(low), 1)), multiple_hits=False)
+                held = len(idx) and np.min(np.linalg.norm(np.asarray(loc).reshape(-1, 3) - low[idx], axis=1)) < 0.6
+            if not held:
+                floating += 1
+    if floating:
+        fails.append(f"{floating} piece(s) float in the air (nothing under them) and would fall off while printing")
     info["parts"] = {p: part_colour(p) for p in meshes}
     return (not fails), dict(fails=fails, warnings=warns, **info)
 
@@ -122,6 +159,8 @@ def qr_check(png, expected):
     import cv2
     g = cv2.cvtColor(cv2.imread(png), cv2.COLOR_BGR2GRAY)
     got = cv2.QRCodeDetector().detectAndDecode(g)[0]
+    if got != expected and hasattr(cv2, "QRCodeDetectorAruco"):   # more robust on angled, raised codes
+        got = cv2.QRCodeDetectorAruco().detectAndDecode(g)[0] or got
     return got == expected, got
 
 # ------------------------------------------------------------------ sql
@@ -152,11 +191,12 @@ def run(slug, steps, publish=False):
     for w in rep["warnings"]: print("  warn ", w)
     print(f"  size {rep['size_mm']} mm · ~{rep['filament_g_estimate']} g PLA · parts {rep['parts']}")
     if ok and "glb" in steps:
-        build_glb({**meshes, **props_for(slug)}, os.path.join(out, "model.glb"))
+        build_glb({**display_for(slug, meshes), **props_for(slug)}, os.path.join(out, "model.glb"))
     if ok and "render" in steps:
         jobs, raw = shots_for(slug, out); render(jobs, out)
         if meta.get("qr"):
-            good, got = qr_check(os.path.join(raw, "detail.png"), meta["fn"].__defaults__[0])
+            from products import with_defaults
+            good, got = qr_check(os.path.join(raw, "scan.png" if "scan" in meta["shots"] else "detail.png"), meta["qr"](with_defaults(meta["fn"])))
             rep["qr_scan"] = got
             if not good:
                 ok = False; rep["fails"].append(f"QR did not scan back correctly (got {got!r})"); print("  FAIL  QR scan")
