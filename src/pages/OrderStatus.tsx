@@ -5,6 +5,9 @@ import { supabase } from '@/lib/supabase'
 import { OrderTracker } from '@/components/OrderTracker'
 import { PaymentPanel, type PaymentStatus } from '@/components/PaymentPanel'
 import { usePageMeta } from '@/lib/pageMeta'
+import { formatRWF } from '@/lib/format'
+import { readLastOrder } from '@/lib/lastOrder'
+import { PersonalisationSummary } from '@/components/PersonalisationSummary'
 
 type OrderStatusValue =
   | 'received'
@@ -33,6 +36,8 @@ export function OrderStatus() {
   const orderNumber = params.get('order')
 
   const [order, setOrder] = useState<Order | null>(null)
+  // Only present in the tab that placed the order (see lib/lastOrder.ts).
+  const [lastOrder] = useState(() => readLastOrder(orderNumber))
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -137,6 +142,36 @@ export function OrderStatus() {
             refSent={order.payment_ref_sent}
             onRefSent={() => setOrder({ ...order, payment_ref_sent: true })}
           />
+          {lastOrder && lastOrder.lines.length > 0 && (
+            <section aria-labelledby="order-pieces" className="border-y border-hairline">
+              <h2
+                id="order-pieces"
+                className="border-b border-hairline px-5 py-4 font-mono text-[9px] uppercase tracking-[0.16em] text-ink-dim sm:px-6"
+              >
+                Your pieces
+              </h2>
+              <ul className="divide-y divide-hairline">
+                {lastOrder.lines.map((line, i) => (
+                  <li
+                    key={i}
+                    className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-3 px-5 py-4 sm:px-6"
+                  >
+                    <p className="font-mono text-xs uppercase text-ink">
+                      {line.quantity} × {line.name}
+                    </p>
+                    <p className="font-mono text-xs text-ink">
+                      {formatRWF(line.unit_price * line.quantity)}
+                    </p>
+                    <PersonalisationSummary
+                      values={line.personalisation}
+                      fields={line.fields}
+                      className="col-span-2"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           <OrderTracker
             orderNumber={order.order_number}
             currentStage={order.status}

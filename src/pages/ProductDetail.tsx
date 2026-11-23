@@ -1,7 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useParams, Link, useLocation } from 'wouter'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
-import { getProductBySlug, isPreviewImage, type Product } from '@/data/products'
+import {
+  getProductBySlug,
+  isPreviewImage,
+  type Personalisation,
+  type Product,
+} from '@/data/products'
+import { MediaSlider, type SlideItem } from '@/components/MediaSlider'
 import { formatRWF } from '@/lib/format'
 import { useCart } from '@/context/CartContext'
 import { SITE } from '@/lib/site'
@@ -27,6 +33,7 @@ export function ProductDetail() {
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
+  const [personalValues, setPersonalValues] = useState<Personalisation>({})
 
   usePageMeta(
     product?.name ?? 'Piece',
@@ -72,13 +79,29 @@ export function ProductDetail() {
     )
   }
 
-  const handleAcquire = () => {
-    addItem(product, quantity)
+  const handleAcquire = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    // The browser has already enforced required + maxLength; trim and cap again
+    // so pasted whitespace or odd input never reaches the cart.
+    const values: Personalisation = {}
+    for (const field of product.personalise) {
+      const v = (personalValues[field.key] ?? '').trim().slice(0, field.max)
+      if (v) values[field.key] = v
+    }
+    addItem(product, quantity, values)
     setAdded(true)
   }
 
-  const hasImage = Boolean(product.image) && product.image.startsWith('http')
-  const preview = hasImage && isPreviewImage(product.image)
+  const slides: SlideItem[] = []
+  if (product.glbUrl) slides.push({ type: 'model', src: product.glbUrl })
+  for (const url of product.gallery) {
+    if (url?.startsWith('http')) slides.push({ type: 'image', src: url, alt: product.name })
+  }
+
+  const fallbackBackground =
+    !product.image.startsWith('http') && product.image ? product.image : undefined
+
+  const preview = product.gallery.some(url => url && isPreviewImage(url))
 
   return (
     <main className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
@@ -107,71 +130,14 @@ export function ProductDetail() {
       {/* Product */}
       <section className="grid border-y border-hairline lg:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
 
-        {/* Object image */}
-        <div
-          className="
-            relative
-            min-h-[420px]
-            overflow-hidden
-            border-b
-            border-hairline
-            lg:min-h-[720px]
-            lg:border-b-0
-            lg:border-r
-          "
-          style={!hasImage ? { background: product.image } : undefined}
-        >
-          {hasImage ? (
-            <img
-              src={product.image}
-              alt={product.name}
-              className="absolute inset-0 h-full w-full bg-[#0b0b0a] object-contain"
-            />
-          ) : (
-            <div
-              className="absolute inset-0"
-              style={{ background: product.image }}
-            />
-          )}
-
-          {/* Object label */}
-          <div className="absolute left-5 top-5">
-            <span
-              className={`font-mono text-[9px] uppercase tracking-[0.16em] ${
-                hasImage ? 'bg-black/70 px-2 py-1 text-white/85' : 'text-ink'
-              }`}
-            >
-              {product.catalogNo}
-            </span>
-          </div>
-
-          {preview && (
-            <div className="absolute right-5 top-5 bg-black/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-white/85">
-              Preview render
-            </div>
-          )}
-
-          {/* Image marker */}
-          <div
-            className="
-              absolute
-              bottom-5
-              right-5
-              flex
-              h-10
-              w-10
-              items-center
-              justify-center
-              border
-              border-black/70
-              bg-panel/80
-              font-mono
-              text-sm
-              text-ink
-            "
-          >
-            ↗
-          </div>
+        {/* Media slider */}
+        <div className="border-b border-hairline lg:border-b-0 lg:border-r">
+          <MediaSlider
+            slides={slides}
+            productName={product.name}
+            catalogNo={product.catalogNo}
+            fallbackBackground={fallbackBackground}
+          />
         </div>
 
         {/* Product information */}
@@ -247,7 +213,55 @@ export function ProductDetail() {
           </div>
 
           {/* Order */}
-          <div className="p-6 sm:p-8 lg:p-10">
+          <form onSubmit={handleAcquire} className="p-6 sm:p-8 lg:p-10">
+
+            {/* Personalisation, one input per field the product defines */}
+            {product.personalise.length > 0 && (
+              <fieldset className="mb-6 flex flex-col gap-4">
+                <legend className="mb-4 font-mono text-[9px] uppercase tracking-[0.16em] text-ink-dim">
+                  Make it yours
+                </legend>
+                {product.personalise.map((field) => {
+                  const id = `personalise-${field.key}`
+                  const value = personalValues[field.key] ?? ''
+                  return (
+                    <div key={field.key}>
+                      <div className="mb-2 flex items-baseline justify-between gap-4">
+                        <label
+                          htmlFor={id}
+                          className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink"
+                        >
+                          {field.label}
+                          {!field.required && (
+                            <span className="text-ink-dim"> (optional)</span>
+                          )}
+                        </label>
+                        <span
+                          aria-hidden="true"
+                          className="font-mono text-[9px] tabular-nums text-ink-dim"
+                        >
+                          {value.length}/{field.max}
+                        </span>
+                      </div>
+                      <input
+                        id={id}
+                        name={field.key}
+                        type="text"
+                        autoComplete="off"
+                        maxLength={field.max}
+                        required={field.required}
+                        value={value}
+                        onChange={(e) => {
+                          setPersonalValues((v) => ({ ...v, [field.key]: e.target.value }))
+                          setAdded(false)
+                        }}
+                        className="w-full border border-hairline bg-transparent px-3 py-3 text-sm text-ink outline-none placeholder:text-ink-dim focus:border-ink"
+                      />
+                    </div>
+                  )
+                })}
+              </fieldset>
+            )}
 
             <div className="flex items-center justify-between">
               <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-ink-dim">
@@ -257,6 +271,7 @@ export function ProductDetail() {
               <div className="flex items-center border border-hairline">
 
                 <button
+                  type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   className="
                     flex
@@ -281,6 +296,7 @@ export function ProductDetail() {
                 </span>
 
                 <button
+                  type="button"
                   onClick={() => setQuantity((q) => q + 1)}
                   className="
                     flex
@@ -305,7 +321,7 @@ export function ProductDetail() {
 
             {/* Add to cart */}
             <button
-              onClick={handleAcquire}
+              type="submit"
               className="
                 mt-6
                 flex
@@ -395,7 +411,7 @@ export function ProductDetail() {
               Made to order / Printed in {SITE.city}, {SITE.country}
             </p>
 
-          </div>
+          </form>
 
         </div>
 

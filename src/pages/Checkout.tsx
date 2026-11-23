@@ -4,6 +4,7 @@ import { useCart } from '@/context/CartContext'
 import { supabase } from '@/lib/supabase'
 import { formatRWF } from '@/lib/format'
 import { sendOrderEmails, type OrderEmail } from '@/lib/notify'
+import { saveLastOrder } from '@/lib/lastOrder'
 type DeliveryMethod = 'pickup' | 'delivery'
 interface PlaceOrderResult {
   order_number: string
@@ -68,9 +69,14 @@ export default function Checkout() {
         p_delivery_method: deliveryMethod,
         p_delivery_address:
           deliveryMethod === 'delivery' ? address.trim() : null,
+        // personalisation is only sent when the line has some. Until the
+        // migration runs, the old place_order ignores the extra key.
         p_items: lines.map((line) => ({
           product_id: line.product.id,
           quantity: line.quantity,
+          ...(line.personalisation && Object.keys(line.personalisation).length > 0
+            ? { personalisation: line.personalisation }
+            : {}),
         })),
       })
       if (orderError) {
@@ -80,6 +86,26 @@ export default function Checkout() {
       if (!order?.order_number) {
         throw new Error('The order could not be created.')
       }
+      // place_order returns lines in the order they were sent. Prefer what the
+      // server stored (trimmed, filtered); fall back to the cart if this is the
+      // pre-migration function that doesn't echo personalisation back.
+      const items = (order.items ?? []).map((item, i) => ({
+        ...item,
+        personalisation:
+          item.personalisation !== undefined
+            ? item.personalisation
+            : (lines[i]?.personalisation ?? null),
+      }))
+      saveLastOrder({
+        orderNumber: order.order_number,
+        lines: items.map((item, i) => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          personalisation: item.personalisation ?? null,
+          fields: lines[i]?.product.personalise ?? [],
+        })),
+      })
       await sendOrderEmails({
         orderNumber: order.order_number,
         customerName: name.trim(),
@@ -88,7 +114,7 @@ export default function Checkout() {
         deliveryMethod,
         deliveryAddress:
           deliveryMethod === 'delivery' ? address.trim() : null,
-        items: order.items,
+        items,
         subtotal: order.subtotal,
         deliveryFee: order.delivery_fee,
         total: order.total,

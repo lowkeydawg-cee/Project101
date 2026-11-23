@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { PersonalisationSummary } from '@/components/PersonalisationSummary'
 type OrderStatus =
   | 'received'
   | 'production'
@@ -11,6 +12,8 @@ type OrderItem = {
   product_name: string
   quantity: number
   unit_price: number
+  /** Selected with order_items(*) so this page still loads before the migration adds the column. */
+  personalisation?: Record<string, string> | null
 }
 type Order = {
   id: string
@@ -98,12 +101,7 @@ export function AdminOrders() {
         momo_txn_id,
         paid_at,
         pay_by,
-        order_items (
-          id,
-          product_name,
-          quantity,
-          unit_price
-        )
+        order_items ( * )
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, from + PAGE_SIZE - 1)
@@ -344,6 +342,10 @@ export function AdminOrders() {
                           <p className="mt-2 font-mono text-[8px] uppercase text-ink-dim">
                             Unit / {formatRWF(item.unit_price)}
                           </p>
+                          <PersonalisationSummary
+                            values={item.personalisation}
+                            className="mt-3"
+                          />
                         </div>
                         <p className="font-mono text-[9px] uppercase text-ink-dim sm:text-center">
                           × {item.quantity}

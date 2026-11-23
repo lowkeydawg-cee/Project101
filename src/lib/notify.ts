@@ -29,7 +29,13 @@ export interface OrderEmail {
   customerPhone: string
   deliveryMethod: 'pickup' | 'delivery'
   deliveryAddress: string | null
-  items: { name: string; quantity: number; unit_price: number }[]
+  items: {
+    name: string
+    quantity: number
+    unit_price: number
+    /** What the customer typed, e.g. { name: 'Amani' }. Absent from the pre-migration function. */
+    personalisation?: Record<string, string> | null
+  }[]
   subtotal: number
   deliveryFee: number
   total: number
@@ -62,7 +68,13 @@ export async function sendOrderEmails(order: OrderEmail): Promise<void> {
     delivery_method: order.deliveryMethod === 'delivery' ? 'Delivery' : 'Pickup',
     delivery_address: order.deliveryAddress ?? 'Not given',
     items: order.items
-      .map((i) => `${i.quantity} × ${i.name} · ${formatRWF(i.unit_price * i.quantity)}`)
+      .map((i) => {
+        const line = `${i.quantity} × ${i.name} · ${formatRWF(i.unit_price * i.quantity)}`
+        const extra = Object.entries(i.personalisation ?? {})
+          .filter(([, v]) => v)
+          .map(([k, v]) => `    ${k}: ${v}`)
+        return [line, ...extra].join('\n')
+      })
       .join('\n'),
     subtotal: formatRWF(order.subtotal),
     delivery_fee: order.deliveryFee ? formatRWF(order.deliveryFee) : 'Free',

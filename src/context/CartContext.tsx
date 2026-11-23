@@ -5,18 +5,20 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { Product } from '@/data/products'
+import type { Personalisation, Product } from '@/data/products'
 
 export interface CartLine {
   product: Product
   quantity: number
+  /** What the customer typed for this line. Absent for products without fields. */
+  personalisation?: Personalisation
 }
 
 interface CartContextValue {
   lines: CartLine[]
-  addItem: (product: Product, quantity?: number) => void
-  removeItem: (productId: string) => void
-  setQuantity: (productId: string, quantity: number) => void
+  addItem: (product: Product, quantity?: number, personalisation?: Personalisation) => void
+  removeItem: (key: string) => void
+  setQuantity: (key: string, quantity: number) => void
   clear: () => void
   subtotal: number
   itemCount: number
@@ -28,6 +30,26 @@ const CartContext = createContext<CartContextValue | null>(null)
 
 const STORAGE_KEY = 'safehouse-cart'
 
+/** Drops empty values and sorts keys, so equal personalisations compare equal. */
+function normalise(p: Personalisation | undefined): Personalisation | undefined {
+  if (!p) return undefined
+  const out: Personalisation = {}
+  for (const k of Object.keys(p).sort()) {
+    const v = typeof p[k] === 'string' ? p[k].trim() : ''
+    if (v) out[k] = v
+  }
+  return Object.keys(out).length > 0 ? out : undefined
+}
+
+/**
+ * Identity of a cart line: the product plus what was typed for it, so the
+ * same nameplate with two different names is two lines.
+ */
+export function lineKey(line: Pick<CartLine, 'product' | 'personalisation'>): string {
+  const p = normalise(line.personalisation)
+  return p ? `${line.product.id}::${JSON.stringify(p)}` : line.product.id
+}
+
 function readStoredCart(): CartLine[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -36,7 +58,13 @@ function readStoredCart(): CartLine[] {
 
     const parsed = JSON.parse(stored)
 
-    return Array.isArray(parsed) ? parsed : []
+    if (!Array.isArray(parsed)) return []
+
+    // Carts saved before personalisation existed have no such field; that is fine.
+    return parsed.filter(
+      (l): l is CartLine =>
+        Boolean(l?.product?.id) && Number.isInteger(l.quantity) && l.quantity > 0,
+    )
   } catch {
     return []
   }
@@ -62,41 +90,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const addItem = (product: Product, quantity = 1) => {
-    updateLines((current) => {
-      const existing = current.find(
-        (line) => line.product.id === product.id,
-      )
+  const addItem = (product: Product, quantity = 1, personalisation?: Personalisation) => {
+    const incoming: CartLine = { product, quantity }
+    const p = normalise(personalisation)
+    if (p) incoming.personalisation = p
+    const key = lineKey(incoming)
 
-      if (existing) {
+    updateLines((current) => {
+      if (current.some((line) => lineKey(line) === key)) {
         return current.map((line) =>
-          line.product.id === product.id
-            ? {
-                ...line,
-                quantity: line.quantity + quantity,
-              }
+          lineKey(line) === key
+            ? { ...line, quantity: line.quantity + quantity }
             : line,
         )
       }
 
-      return [...current, { product, quantity }]
+      return [...current, incoming]
     })
   }
 
-  const removeItem = (productId: string) => {
+  const removeItem = (key: string) => {
     updateLines((current) =>
-      current.filter((line) => line.product.id !== productId),
+      current.filter((line) => lineKey(line) !== key),
     )
   }
 
-  const setQuantity = (
-    productId: string,
-    quantity: number,
-  ) => {
+  const setQuantity = (key: string, quantity: number) => {
     updateLines((current) =>
       current
         .map((line) =>
-          line.product.id === productId
+          lineKey(line) === key
             ? { ...line, quantity }
             : line,
         )

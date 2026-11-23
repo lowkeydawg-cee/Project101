@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'wouter'
-import { useCart } from '@/context/CartContext'
+import { lineKey, useCart } from '@/context/CartContext'
+import { PersonalisationSummary } from '@/components/PersonalisationSummary'
 import { formatRWF } from '@/lib/format'
 
 export function CartDrawer() {
@@ -60,7 +61,7 @@ export function CartDrawer() {
             ) : (
               lines.map((line) => (
                 <div
-                  key={line.product.id}
+                  key={lineKey(line)}
                   className="flex items-center justify-between border border-hairline bg-panel p-4"
                 >
                   <div className="min-w-0">
@@ -71,6 +72,12 @@ export function CartDrawer() {
                     <p className="mt-1 text-xs text-ink-dim">
                       {formatRWF(line.product.price)} each
                     </p>
+
+                    <PersonalisationSummary
+                      values={line.personalisation}
+                      fields={line.product.personalise}
+                      className="mt-2"
+                    />
                   </div>
 
                   <div className="ml-4 flex shrink-0 items-center space-x-3">
@@ -80,7 +87,7 @@ export function CartDrawer() {
                         aria-label={`Decrease quantity of ${line.product.name}`}
                         onClick={() =>
                           setQuantity(
-                            line.product.id,
+                            lineKey(line),
                             line.quantity - 1
                           )
                         }
@@ -98,7 +105,7 @@ export function CartDrawer() {
                         aria-label={`Increase quantity of ${line.product.name}`}
                         onClick={() =>
                           setQuantity(
-                            line.product.id,
+                            lineKey(line),
                             line.quantity + 1
                           )
                         }
@@ -110,7 +117,7 @@ export function CartDrawer() {
 
                     <button
                       type="button"
-                      onClick={() => removeItem(line.product.id)}
+                      onClick={() => removeItem(lineKey(line))}
                       className="text-xs font-mono text-red-500 transition-colors hover:text-red-400"
                     >
                       [REMOVE]

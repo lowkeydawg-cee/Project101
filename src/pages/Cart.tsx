@@ -1,6 +1,7 @@
 import { Link } from 'wouter'
 import { ArrowLeft, ArrowUpRight, Minus, Plus, X } from 'lucide-react'
-import { useCart } from '@/context/CartContext'
+import { lineKey, useCart } from '@/context/CartContext'
+import { PersonalisationSummary } from '@/components/PersonalisationSummary'
 import { formatRWF } from '@/lib/format'
 import { buttonClass } from '@/components/Button'
 import { usePageMeta } from '@/lib/pageMeta'
@@ -132,12 +133,14 @@ export function Cart() {
 
             <div className="divide-y divide-hairline">
 
-              {lines.map(({ product, quantity }) => {
+              {lines.map((line) => {
+                const { product, quantity } = line
+                const key = lineKey(line)
                 const hasImage = Boolean(product.image) && product.image.startsWith('http')
 
                 return (
                   <article
-                    key={product.id}
+                    key={key}
                     className="grid gap-5 py-7 sm:grid-cols-[180px_1fr] sm:gap-6"
                   >
 
@@ -216,7 +219,7 @@ export function Cart() {
                           </div>
 
                           <button
-                            onClick={() => removeItem(product.id)}
+                            onClick={() => removeItem(key)}
                             aria-label={`Remove ${product.name} from cart`}
                             className="
                               shrink-0
@@ -235,6 +238,12 @@ export function Cart() {
                           {formatRWF(product.price)} / piece
                         </p>
 
+                        <PersonalisationSummary
+                          values={line.personalisation}
+                          fields={product.personalise}
+                          className="mt-4"
+                        />
+
                       </div>
 
                       <div className="flex items-end justify-between gap-4">
@@ -249,7 +258,7 @@ export function Cart() {
 
                             <button
                               onClick={() =>
-                                setQuantity(product.id, quantity - 1)
+                                setQuantity(key, quantity - 1)
                               }
                               className="
                                 flex
@@ -273,7 +282,7 @@ export function Cart() {
 
                             <button
                               onClick={() =>
-                                setQuantity(product.id, quantity + 1)
+                                setQuantity(key, quantity + 1)
                               }
                               className="
                                 flex
