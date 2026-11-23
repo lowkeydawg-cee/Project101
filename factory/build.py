@@ -28,7 +28,7 @@ def build_stl(slug, out, overrides=None):
     meshes = {}
     for part, man in parts.items():
         mesh = man.to_mesh()
-        t = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=True)
+        t = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=False)
         t.export(os.path.join(d, f"{slug}_{part}.stl")); meshes[part] = t
     return meshes
 
@@ -40,7 +40,7 @@ def display_for(slug, meshes, overrides=None):
     out = {}
     for k, man in fn(**(overrides or {})).items():
         mesh = man.to_mesh()
-        out[k] = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=True)
+        out[k] = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=False)
     return out
 
 def props_for(slug, overrides=None):
@@ -50,7 +50,7 @@ def props_for(slug, overrides=None):
     out = {}
     for k, man in fn().items():
         mesh = man.to_mesh()
-        out[k] = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=True)
+        out[k] = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=False)
     return out
 
 # ------------------------------------------------------------------ checks

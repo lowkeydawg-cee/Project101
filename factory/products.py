@@ -294,8 +294,23 @@ def desk_set_display(**kw):
     return p
 
 from car import sports_car, sports_car_display
+from court_kit import arena_court_print, arena_court_display, full_court_print, full_court_display
 
 CATALOG = {
+  "arena-court": dict(fn=arena_court_print, display=arena_court_display, name="Arena Court", code="SH-TY-002",
+      category="Toys", price=25000, slide3="profile", profile_caption="REAL COURT MARKINGS · WOVEN NET",
+      headline="YOUR COURT. YOUR DESK.", custom="Choose the key colour",
+      colours="Black floor · white lines · red key · white board",
+      description="A half court for the desk, marked to real proportions: three-point line, key, free-throw circle and restricted area. Pro stanchion with a padded base, a backboard with the shooter's square, a woven net and a ball. Slots together, no glue needed for the stand.",
+      personalise={},
+      shots=dict(hero=dict(az=148, el=22), detail=dict(az=170, el=12, zoom=1.9, ty=0.18, tz=0.0), profile=dict(az=90, el=6))),
+  "full-court": dict(fn=full_court_print, display=full_court_display, name="Full Court", code="SH-TY-003",
+      category="Toys", price=28000, slide3="profile", profile_caption="BOTH ENDS · REAL PROPORTIONS",
+      headline="END TO END.", custom="Choose the key colour",
+      colours="Black floor · white lines · blue keys · red centre",
+      description="A full court for the shelf or desk, both halves marked to real proportions with a hoop at each end, woven nets and a ball at centre court.",
+      personalise={},
+      shots=dict(hero=dict(az=-60, el=30), detail=dict(az=-24, el=24, zoom=1.7, ty=0.05, tx=-0.12), profile=dict(az=90, el=8))),
   "sports-car": dict(fn=sports_car, display=sports_car_display, name="Safehouse GT", code="SH-TY-001",
       category="Toys", price=12000, slide3="profile", profile_caption="NO SUPPORTS · NO COLOUR SWAPS · IT ROLLS",
       headline="DESIGNED IN KIGALI. BUILT TO ROLL.", custom="Choose your colourway",
