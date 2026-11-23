@@ -21,6 +21,33 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def clean(v, mx):
     return re.sub(r"[\x00-\x1f\x7f]", "", str(v or "")).strip()[:mx]
 
+def expand_numbers(text, count):
+    """'1-6' / '1,2,3,4,5,VIP' -> exactly `count` labels, or ValueError."""
+    out = []
+    for part in re.split(r"[,\s]+", text.strip()):
+        if not part: continue
+        m = re.fullmatch(r"(\d{1,3})-(\d{1,3})", part)
+        if m:
+            a, b = int(m.group(1)), int(m.group(2))
+            if b < a or b - a > 50: raise ValueError(f"range {part} doesn't make sense")
+            out += [str(i) for i in range(a, b + 1)]
+        else:
+            out.append(part.upper())
+    if len(out) != count:
+        raise ValueError(f"the set has {count} table numbers but {len(out)} were given ({', '.join(out) or 'none'})")
+    return out
+
+def expand_bundle(row):
+    """A set order -> one row per printed piece, each with its own personalisation."""
+    meta = CATALOG[row["slug"]]; given = row.get("personalisation") or {}; rows = []
+    for c in meta["bundle"]:
+        if c.get("each"):
+            for label in expand_numbers(str(given.get(c["each"], "")), c["count"]):
+                rows.append(dict(row, slug=c["slug"], personalisation={"number": label}))
+        else:
+            rows.append(dict(row, slug=c["slug"], personalisation={k: given.get(v) for k, v in c["map"].items()}))
+    return rows
+
 def run_item(order, n, item):
     slug = item["slug"]; tag = f"{order}/{n}-{slug}"
     if slug not in CATALOG:
@@ -65,8 +92,16 @@ def main(path):
     rows = json.load(open(path)); jobs = []
     counters = {}
     for r in rows:
-        o = r["order_number"]; counters[o] = counters.get(o, 0) + 1
-        jobs.append(run_item(o, counters[o], r))
+        if r.get("slug") in CATALOG and CATALOG[r["slug"]].get("bundle"):
+            try:
+                pieces = [p for _ in range(int(r.get("quantity", 1))) for p in expand_bundle(dict(r, quantity=1))]
+            except ValueError as e:
+                jobs.append(dict(item=f"{r['order_number']}/{r['slug']}", status="NEEDS CUSTOMER", reason=str(e))); continue
+        else:
+            pieces = [r]
+        for p in pieces:
+            o = p["order_number"]; counters[o] = counters.get(o, 0) + 1
+            jobs.append(run_item(o, counters[o], p))
     print(f"\n{'ITEM':38} {'STATUS':20} DETAIL")
     for j in jobs:
         detail = j.get("reason") or f"{j['filament_g']} g · {j['size_mm']} mm" + (f" · QR ✓" if j.get("qr_scan") else "")

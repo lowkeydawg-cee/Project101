@@ -35,6 +35,7 @@ def build_stl(slug, out, overrides=None):
 def display_for(slug, meshes, overrides=None):
     """Meshes to show in renders / the 3D viewer: the assembled object when the print layout differs."""
     fn = CATALOG[slug].get("display")
+    if fn and CATALOG[slug].get("bundle"): overrides = None      # sets always show the sample pieces
     if not fn: return meshes
     out = {}
     for k, man in fn(**(overrides or {})).items():
@@ -185,8 +186,14 @@ def run(slug, steps, publish=False):
     from slides import build_slides
     meta = CATALOG[slug]; out = os.path.join(HERE, "out", slug); os.makedirs(out, exist_ok=True)
     print(f"\n== {meta['name']} ({meta['code']})")
-    meshes = build_stl(slug, out)
-    ok, rep = check(meshes)
+    if meta.get("bundle"):                       # a set: pieces are checked on their own listings
+        meshes = display_for(slug, None); ok = True
+        rep = dict(fails=[], warnings=[], size_mm=[round(float(v), 1) for v in np.ptp(np.vstack([m.bounds for m in meshes.values()]), 0)],
+                   filament_g_estimate=0, parts={k: part_colour(k) for k in meshes},
+                   pieces=[c["slug"] + (f" x{c['count']}" if c.get("count") else "") for c in meta["bundle"]])
+    else:
+        meshes = build_stl(slug, out)
+        ok, rep = check(meshes)
     for f in rep["fails"]: print("  FAIL ", f)
     for w in rep["warnings"]: print("  warn ", w)
     print(f"  size {rep['size_mm']} mm · ~{rep['filament_g_estimate']} g PLA · parts {rep['parts']}")

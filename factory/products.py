@@ -268,7 +268,60 @@ def table_number_display(NUMBER="07", **kw):
     stand = lambda m: m.rotate([90, 0, 0]).translate([5, y, BH - SLOT])
     return {"body": p["base"] + stand(p["plate"]), "accent": stand(p["accent"])}
 
+
+# ---- Sets: several catalogue pieces sold together ---------------------------
+def _merge(parts, extra, offset):
+    for k, m in extra.items():
+        m = m.translate(offset); parts[k] = parts[k] + m if k in parts else m
+    return parts
+
+def cafe_set_display(**kw):
+    """Display only: Signal Arch + Connect Display behind three of the six table numbers."""
+    p = {}
+    _merge(p, wifi_stand(), [0, 0, 0])
+    _merge(p, connect_display(), [140, 110, 0])
+    for i, n in enumerate(["01", "02"]):
+        _merge(p, table_number_display(n), [128 + i * 100, -6, 0])
+    return p
+
+def desk_set_display(**kw):
+    """Display only: Signal Arch, Card Holder and Signature Nameplate on one desk."""
+    p = {}
+    _merge(p, wifi_stand(), [0, 70, 0])
+    _merge(p, card_holder(), [140, 95, 0])
+    _merge(p, card_holder_props(), [140, 95, 0])
+    _merge(p, nameplate(), [20, -30, 0])
+    return p
+
 CATALOG = {
+  "cafe-set": dict(fn=cafe_set_display, display=cafe_set_display, name="Café Set", code="SH-SET-001",
+      category="Business", price=55000, slide3="stamp", stamp_where="ON EVERY PIECE",
+      bundle=[dict(slug="wifi-stand", map={"ssid": "ssid", "password": "password"}),
+              dict(slug="connect-display", map={"link": "link"}),
+              dict(slug="table-number", each="tables", count=6)],
+      headline="EVERYTHING A COUNTER NEEDS", custom="Your Wi-Fi, your MoMo code, your table numbers",
+      size_text="8 pieces: Wi-Fi stand, pay stand, 6 table numbers",
+      colours="Matte black · white QR panels · grey details",
+      description="Everything a café counter needs in one order: the Signal Arch Wi-Fi stand, a Connect Display with your MoMo code or menu, and six House Frame table numbers. 63,000 RWF if bought separately.",
+      personalise={"ssid": dict(param="ssid", label="Wi-Fi network name", max=32, required=True),
+                   "password": dict(param="password", label="Wi-Fi password (leave empty if open)", max=63, required=False),
+                   "link": dict(param="link", label="MoMo code or menu link for the pay stand", max=200, required=True),
+                   "tables": dict(param="tables", label="Six table numbers (e.g. 1-6 or 1,2,3,4,5,VIP)", max=40, required=True)},
+      shots=dict(hero=dict(az=-24, el=22), detail=dict(az=-6, el=30, zoom=1.3, tx=0.12, tz=-0.05))),
+  "desk-set": dict(fn=desk_set_display, display=desk_set_display, name="Front Desk Set", code="SH-SET-002",
+      category="Business", price=32000, slide3="stamp", stamp_where="ON EVERY PIECE",
+      bundle=[dict(slug="wifi-stand", map={"ssid": "ssid", "password": "password"}),
+              dict(slug="card-holder", map={}),
+              dict(slug="signature-nameplate", map={"name": "name", "title": "title"})],
+      headline="A RECEPTION, SORTED", custom="Your Wi-Fi and the name on the desk",
+      size_text="3 pieces: Wi-Fi stand, card holder, nameplate",
+      colours="Matte black · white QR panel · grey details",
+      description="For a reception or front desk: the Signal Arch Wi-Fi stand, the Reception Card Holder and a Signature Nameplate with your name. 37,000 RWF if bought separately.",
+      personalise={"ssid": dict(param="ssid", label="Wi-Fi network name", max=32, required=True),
+                   "password": dict(param="password", label="Wi-Fi password (leave empty if open)", max=63, required=False),
+                   "name": dict(param="name", label="Name for the nameplate", max=32, required=True),
+                   "title": dict(param="title", label="Title (optional)", max=40, required=False)},
+      shots=dict(hero=dict(az=-24, el=22), detail=dict(az=-8, el=16, zoom=1.3, tz=-0.15))),
   "table-number": dict(fn=table_number, display=table_number_display, name="House Frame Table Number",
       code="SH-BC-005", category="Business", price=5000, slide3="stamp", stamp_where="UNDERNEATH",
       headline="YOUR TABLES, NUMBERED", custom="Any number or short code, up to 3 characters",
