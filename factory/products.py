@@ -104,7 +104,7 @@ def _arc_band(r_in, r_out, a0, a1, n=64):
                          [[r_in * np.cos(t), r_in * np.sin(t)] for t in a[::-1]]])
 
 def wifi_stand(SSID="Safehouse Studio", PASSWORD="printedinkigali", SECURITY="WPA", HIDDEN=False,
-               W=112, D=100, QR=40, LABEL="SCAN FOR WI-FI", BRAND_FRONT=True):
+               W=112, D=100, QR=40, LABEL="SCAN FOR WI-FI", BRAND_FRONT=True, CROWN="none"):
     """Signal Arch: the Wi-Fi symbol stands on the counter (grey arcs inlaid in a black fan),
     with the scan-to-join QR on the sloped front. Shows the network name, never the password.
     The house badge on the right marks where an NFC tag goes in the Tap & Scan version."""
@@ -115,8 +115,37 @@ def wifi_stand(SSID="Safehouse Studio", PASSWORD="printedinkigali", SECURITY="WP
     sector = CrossSection([[[0, 0]] + [[R * np.cos(t), R * np.sin(t)] for t in np.radians(np.linspace(47, 133, 64))]])
     arcs = _arc_band(25, 32, 50, 130) + _arc_band(40, 47, 50, 130) + _arc_band(55, 62, 50, 130)
     stand = lambda cs: cs.extrude(T).rotate([90, 0, 0]).translate([cx, yb + T, zc])
-    accent = stand(arcs)
-    body = base + stand(sector) - accent
+    if CROWN == "fan":                                   # original: the Wi-Fi symbol standing as a fan
+        accent = stand(arcs)
+        body = base + stand(sector) - accent
+    elif CROWN == "none":                                # clean wedge, nothing on top
+        accent = Manifold()
+        body = base
+    elif CROWN == "flat":                                # small Wi-Fi mark inlaid flush in the top face
+        gy = SLOPE_END + 6
+        glyph = _arc_band(5.5, 8.0, 45, 135) + _arc_band(11.0, 13.5, 45, 135) + _arc_band(16.5, 19.0, 45, 135) + \
+            CrossSection.circle(2.2, 48)
+        accent = glyph.extrude(DEB).translate([cx, gy, TOP - DEB])
+        body = base - glyph.offset(0.0, JoinType.Round).extrude(DEB + 0.01).translate([cx, gy, TOP - DEB])
+    elif CROWN == "halo":                                # one slim arch, sunk into the base
+        # one slim white arch spanning the top: 3.6 mm band, 4 mm deep, both feet sunk 3 mm into sockets
+        R_out, band_w, depth, a0 = 50.0, 3.6, 4.0, 9.0
+        band = _arc_band(R_out - band_w, R_out, a0, 180 - a0, 160)
+        zc = TOP - R_out * np.sin(np.radians(a0)) - 3.0
+        yh = (SLOPE_END + D) / 2 + depth / 2
+        accent = band.extrude(depth).rotate([90, 0, 0]).translate([cx, yh, zc])
+        body = base - accent
+    elif CROWN == "slab":                                # a quiet upright card with the Wi-Fi mark inlaid
+        Hs = 42
+        card = CrossSection.square([W - 24, Hs + 10]).offset(-6, JoinType.Round).offset(6, JoinType.Round)
+        slab = card.extrude(6).rotate([90, 0, 0]).translate([12, yb + 6, TOP - 10])
+        glyph = _arc_band(6.5, 9.5, 45, 135) + _arc_band(13.0, 16.0, 45, 135) + _arc_band(19.5, 22.5, 45, 135) + \
+            CrossSection.circle(2.6, 48)
+        gl = glyph.extrude(DEB + 0.01).rotate([90, 0, 0]).translate([cx, yb + DEB, TOP + 14])
+        accent = glyph.extrude(DEB).rotate([90, 0, 0]).translate([cx, yb + DEB, TOP + 14])
+        body = base + slab - gl
+    else:
+        raise ValueError("CROWN must be fan, none, flat, halo or slab")
     # QR + label + network name on the slope
     qz, below, MAX_PW = 4, 17, 64             # the panel may widen up to 64 mm for long network names
     lab, (lw, _) = fit_text(LABEL.upper(), MAX_PW - 6, 3.4, 2.8, 0.8, "label", 0.25, 0.08)
@@ -129,12 +158,24 @@ def wifi_stand(SSID="Safehouse Studio", PASSWORD="printedinkigali", SECURITY="WP
     place = lambda m, x, s: m.rotate([phi, 0, 0]).translate([x, 0, FRONT_H]).translate([0, s * np.cos(np.radians(phi)), s * np.sin(np.radians(phi))])
     qx = 12
     panel, code = place(panel, qx, 3), place(code, qx, 3)
+    clean = CROWN in ("none", "halo")                    # the refined versions: everything inlaid flush
+    nrm = np.array([0, -np.sin(np.radians(phi)), np.cos(np.radians(phi))])
+    if clean:
+        sink = lambda m, d: m.translate((-d * nrm).tolist())
+        body = body - sink(panel, 0.6)
+        panel, code = sink(panel, 0.55), sink(code, 0.55)      # 0.05 proud: a crisp edge, no coplanar faces
     if BRAND_FRONT:   # house badge (future NFC tap spot)
         ring = (CrossSection.circle(12, 64) - CrossSection.circle(10.8, 64)).extrude(0.8).translate([12, 12, 0])
         lg, (lgw, lgh) = logo(13, 0.8)
         badge = ring + lg.translate([12 - lgw / 2, 12 - lgh / 2, 0])
         bx = qx + pw + (W - qx - pw - 24) / 2
-        accent = accent + place(badge, bx, 3 + ph / 2 - 12)
+        badge = place(badge, bx, 3 + ph / 2 - 12)
+        if clean:
+            body = body - sink(badge, 0.8)
+            badge = sink(badge, 0.75)
+        accent = accent + badge
+    if clean:                                            # soft plan corners
+        body = body ^ CrossSection.square([W, D]).offset(-6, JoinType.Round).offset(6, JoinType.Round).extrude(TOP + 1)
     mk, ms = maker_mark("SH-BC-004", DEB + 0.3)
     body = body - cut_back(mk, ms, D, cx, TOP / 2)
     return {"body": body, "panel": panel, "code": code, "accent": accent}
@@ -337,20 +378,6 @@ CATALOG = {
       description="An original pocket supercar, about 9 cm long. The wheels turn on real axles, the canopy lifts off, and every part is printed in solid colour, so nothing is painted to chip off.",
       personalise={},
       shots=dict(hero=dict(az=-38, el=16), detail=dict(az=-150, el=20, zoom=1.15), profile=dict(az=0, el=3))),
-  "cafe-set": dict(fn=cafe_set_display, display=cafe_set_display, name="Café Set", code="SH-SET-001",
-      category="Business", price=55000, slide3="stamp", stamp_where="ON EVERY PIECE",
-      bundle=[dict(slug="wifi-stand", map={"ssid": "ssid", "password": "password"}),
-              dict(slug="connect-display", map={"link": "link"}),
-              dict(slug="table-number", each="tables", count=6)],
-      headline="EVERYTHING A COUNTER NEEDS", custom="Your Wi-Fi, your MoMo code, your table numbers",
-      size_text="8 pieces: Wi-Fi stand, pay stand, 6 table numbers",
-      colours="Matte black · white QR panels · grey details",
-      description="Everything a café counter needs in one order: the Signal Arch Wi-Fi stand, a Connect Display with your MoMo code or menu, and six House Frame table numbers. 63,000 RWF if bought separately.",
-      personalise={"ssid": dict(param="ssid", label="Wi-Fi network name", max=32, required=True),
-                   "password": dict(param="password", label="Wi-Fi password (leave empty if open)", max=63, required=False),
-                   "link": dict(param="link", label="MoMo code or menu link for the pay stand", max=200, required=True),
-                   "tables": dict(param="tables", label="Six table numbers (e.g. 1-6 or 1,2,3,4,5,VIP)", max=40, required=True)},
-      shots=dict(hero=dict(az=-24, el=22), detail=dict(az=-6, el=30, zoom=1.3, tx=0.12, tz=-0.05))),
   "desk-set": dict(fn=desk_set_display, display=desk_set_display, name="Front Desk Set", code="SH-SET-002",
       category="Business", price=32000, slide3="stamp", stamp_where="ON EVERY PIECE",
       bundle=[dict(slug="wifi-stand", map={"ssid": "ssid", "password": "password"}),
@@ -365,13 +392,6 @@ CATALOG = {
                    "name": dict(param="name", label="Name for the nameplate", max=32, required=True),
                    "title": dict(param="title", label="Title (optional)", max=40, required=False)},
       shots=dict(hero=dict(az=-24, el=22), detail=dict(az=-8, el=16, zoom=1.3, tz=-0.15))),
-  "table-number": dict(fn=table_number, display=table_number_display, name="House Frame Table Number",
-      code="SH-BC-005", category="Business", price=5000, slide3="stamp", stamp_where="UNDERNEATH",
-      headline="YOUR TABLES, NUMBERED", custom="Any number or short code, up to 3 characters",
-      colours="Matte black · grey number and frame",
-      description="A table number in the shape of the Safehouse house, standing in a solid base. The plate lifts out for cleaning. Order one per table and tell us each number.",
-      personalise={"number": dict(param="NUMBER", label="Table number", max=3, required=True)},
-      shots=dict(hero=dict(az=-28, el=14), detail=dict(az=-8, el=10, zoom=1.25, ty=0.04))),
   "connect-display": dict(fn=connect_display, name="Connect Display", code="SH-BC-001", category="Business",
       price=18000, slide3="stamp", qr=lambda kw: kw["PAYLOAD"],
       headline="YOUR LINK, PRINTED IN", custom="Your MoMo code, menu, Instagram or website",
@@ -384,11 +404,11 @@ CATALOG = {
       qr=lambda kw: wifi_payload(kw["SSID"], kw["PASSWORD"], kw["SECURITY"], kw["HIDDEN"]),
       headline="SCAN, AND YOU'RE ONLINE", custom="Your network name and password, inside the QR",
       colours="Black body · white details (your choice of colours) · white QR panel",
-      description="The Wi-Fi symbol, standing on your counter. Guests scan the QR on the front to join your network: it shows your network name, and the password stays inside the code. For cafés, hotels, offices and short-stay apartments.",
+      description="A clean wedge for your counter. Guests scan the QR to join your Wi-Fi: it shows your network name, and the password stays inside the code. For cafés, hotels, offices and short-stay apartments.",
       personalise={"ssid": dict(param="SSID", label="Wi-Fi network name", max=32, required=True),
                    "password": dict(param="PASSWORD", label="Wi-Fi password (leave empty if open)", max=63, required=False)},
       shots=dict(hero=dict(az=-32, el=20), detail=dict(az=-14, el=24, zoom=1.45, tx=0.0, ty=0.05, tz=0.05),
-                 scan=dict(az=0, el=66, zoom=2.0, tx=-0.08, ty=-0.36, tz=0.26))),
+                 scan=dict(az=0, el=66, zoom=1.6, tx=-0.18, ty=-0.1, tz=0.0))),
   "signature-nameplate": dict(fn=nameplate, name="Signature Nameplate", code="SH-PC-001", category="Signature",
       price=12000, slide3="stamp",
       headline="YOUR NAME, SET IN RELIEF", custom="Your name and title", colours="Black body · white lettering (your choice of colours)",
