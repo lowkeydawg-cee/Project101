@@ -13,7 +13,7 @@ export const SITE = {
   legalName: 'The Safehouse (Domus Tuta)',
   tagline: 'Kigali 3D fabrication studio',
   description:
-    'The Safehouse is a Kigali 3D printing studio. Wall art, figurines, tealight modules and custom parts, printed to order and collected in Kigali or delivered.',
+    'The Safehouse is a 3D printing studio in Kigali. Desk and business pieces, personalised nameplates, toys and custom parts, printed to order. Collect in Kigali or get it delivered.',
 
   /** Live address of the site. Change this if the domain ever changes, along with index.html and public/sitemap.xml. */
   url: 'https://www.safehouse.rw',

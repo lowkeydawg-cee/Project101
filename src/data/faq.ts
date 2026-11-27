@@ -27,8 +27,8 @@ export const FAQ_GROUPS: FaqGroup[] = [
     title: 'The pieces',
     items: [
       {
-        q: 'Will it look like the photo?',
-        a: `Yes, because it is the same file and the same machine. Printed objects carry fine horizontal layer lines, which are part of how they look and feel. Ask and we will send you a photo of your actual print before it leaves the studio.`,
+        q: 'Will it look like the pictures?',
+        a: `The pictures marked "Preview render" are made from the same 3D file we print, so the shape and size match. The real piece also carries fine horizontal layer lines, which are part of how printed objects look and feel. Ask and we will send you a photo of your actual print before it leaves the studio.`,
         featured: true,
       },
       {
@@ -38,7 +38,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       },
       {
         q: 'What colours do you have?',
-        a: `It changes as we buy filament. Message us on WhatsApp before you order and we will tell you what is on the shelf today.`,
+        a: `Black, white, red and blue. On most pieces you choose the colour of each part on the product page, and the 3D view shows your choice before you order. Want a colour that is not listed? Ask on WhatsApp.`,
       },
       {
         q: 'How big can you print?',
@@ -106,7 +106,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
       },
       {
         q: 'Can I track my order?',
-        a: `Yes. Your order number is on the confirmation screen and in your email. Enter it on the order status page to see whether it is paid, printing, or ready.`,
+        a: `Yes. Your order number is on the confirmation screen, and you can send it to us on WhatsApp with one tap. Enter it on the order status page to see whether it is paid, printing, or ready.`,
       },
     ],
   },

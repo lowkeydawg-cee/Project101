@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter'
 import { useCart } from '@/context/CartContext'
 import { supabase } from '@/lib/supabase'
 import { formatRWF } from '@/lib/format'
-import { sendOrderEmails, type OrderEmail } from '@/lib/notify'
+import type { Personalisation } from '@/data/products'
 import { saveLastOrder } from '@/lib/lastOrder'
 type DeliveryMethod = 'pickup' | 'delivery'
 interface PlaceOrderResult {
@@ -11,7 +11,7 @@ interface PlaceOrderResult {
   subtotal: number
   delivery_fee: number
   total: number
-  items: OrderEmail['items']
+  items: { name: string; quantity: number; unit_price: number; personalisation?: Personalisation | null }[]
 }
 export default function Checkout() {
   const { lines, subtotal, clear } = useCart()
@@ -105,19 +105,6 @@ export default function Checkout() {
           personalisation: item.personalisation ?? null,
           fields: lines[i]?.product.personalise ?? [],
         })),
-      })
-      await sendOrderEmails({
-        orderNumber: order.order_number,
-        customerName: name.trim(),
-        customerEmail: email.trim(),
-        customerPhone: phone.trim(),
-        deliveryMethod,
-        deliveryAddress:
-          deliveryMethod === 'delivery' ? address.trim() : null,
-        items,
-        subtotal: order.subtotal,
-        deliveryFee: order.delivery_fee,
-        total: order.total,
       })
       clear()
       navigate(`/order-status?order=${order.order_number}`)

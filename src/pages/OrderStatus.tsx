@@ -7,6 +7,7 @@ import { PaymentPanel, type PaymentStatus } from '@/components/PaymentPanel'
 import { usePageMeta } from '@/lib/pageMeta'
 import { formatRWF } from '@/lib/format'
 import { readLastOrder } from '@/lib/lastOrder'
+import { whatsappLink } from '@/lib/site'
 import { PersonalisationSummary } from '@/components/PersonalisationSummary'
 
 type OrderStatusValue =
@@ -142,6 +143,27 @@ export function OrderStatus() {
             refSent={order.payment_ref_sent}
             onRefSent={() => setOrder({ ...order, payment_ref_sent: true })}
           />
+          {lastOrder && lastOrder.lines.length > 0 && (
+            <a
+              href={whatsappLink(
+                [
+                  `Hi Safehouse, I just placed order ${order.order_number}.`,
+                  ...lastOrder.lines.map((line) => {
+                    const extra = Object.entries(line.personalisation ?? {})
+                      .filter(([, v]) => v)
+                      .map(([k, v]) => `${line.fields.find((f) => f.key === k)?.label ?? k.replace('colour_', '') + ' colour'}: ${v}`)
+                    return `- ${line.quantity} x ${line.name}${extra.length ? ` (${extra.join(', ')})` : ''}`
+                  }),
+                  `Total: ${formatRWF(order.total)}`,
+                ].join('\n')
+              )}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="sh-btn flex min-h-[52px] items-center justify-center gap-2 bg-[#25D366] px-5 text-center font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[#0b0b0a] transition-opacity hover:opacity-90"
+            >
+              Send this order to us on WhatsApp
+            </a>
+          )}
           {lastOrder && lastOrder.lines.length > 0 && (
             <section aria-labelledby="order-pieces" className="border-y border-hairline">
               <h2

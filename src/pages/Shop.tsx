@@ -42,7 +42,7 @@ export function Shop() {
   if (loading) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-20 text-center">
-        <p className="font-mono text-xs uppercase text-ink-dim">Loading artifacts...</p>
+        <p className="font-mono text-xs uppercase text-ink-dim">Loading pieces...</p>
       </main>
     )
   }
@@ -59,7 +59,7 @@ export function Shop() {
             </p>
 
             <h1 className="max-w-3xl font-mono text-3xl uppercase leading-tight tracking-tight text-ink sm:text-4xl lg:text-5xl">
-              Active Artifacts,
+              Every piece,
               <br className="hidden sm:block" />
               Made to Order.
             </h1>
@@ -97,7 +97,7 @@ export function Shop() {
       {/* Result count */}
       <div className="mt-6 flex items-center justify-between">
         <p className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">
-          {filtered.length} {filtered.length === 1 ? 'artifact' : 'artifacts'}
+          {filtered.length} {filtered.length === 1 ? 'piece' : 'pieces'}
         </p>
 
         {active && (
@@ -129,7 +129,7 @@ export function Shop() {
         <div className="flex min-h-[280px] items-center justify-center">
           <div className="text-center">
             <p className="font-mono text-sm uppercase text-ink">
-              No artifacts found
+              Nothing here yet
             </p>
             <p className="mt-2 font-mono text-xs text-ink-dim">
               Try another category.

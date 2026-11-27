@@ -253,7 +253,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
               text-ink-dim
             "
           >
-             SEE WHAT'S ON THE SHELF →
+             VIEW THE PIECE →
           </span>
         </div>
       </div>

@@ -31,9 +31,9 @@ export function About() {
           not a factory.
         </h1>
         <p className="mt-6 max-w-xl text-ink-dim">
-          The Safehouse started as a handful of printers and a growing catalog of
-          objects worth keeping. We fabricate on demand out of Kigali, a mix of
-          our own designs and pieces our customers bring in as their own files.
+          The Safehouse is one printer, one maker and a growing catalogue of
+          objects worth keeping. Everything is printed to order in Kigali: our
+          own designs, and pieces customers bring in as their own files.
         </p>
       </section>
 

@@ -1,98 +1,14 @@
 /**
- * Order notification emails via EmailJS (https://www.emailjs.com).
+ * How messages and orders reach the studio.
  *
- * Two emails go out after a successful order:
- *   - one to the shop (the admin template's "To" address is set in EmailJS)
- *   - one to the customer (the customer template's "To" is {{customer_email}})
+ * Contact notes and quote requests are saved in the database
+ * (public.inquiries, through the submit_inquiry function). Saving fires the
+ * "notify" server function, which alerts Saint on WhatsApp and by email once
+ * those channels are switched on (see supabase/functions/notify).
  *
- * If the VITE_EMAILJS_* variables aren't set, this does nothing, orders
- * still go through, you just won't get emails. Email failures never block
- * or undo an order.
+ * Nothing secret lives in the browser: no email or WhatsApp keys here.
  */
-
-import { formatRWF } from './format'
-import { momoInstructions } from './momo'
-
-const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined
-const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string | undefined
-const ADMIN_TEMPLATE = import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID as string | undefined
-const CUSTOMER_TEMPLATE = import.meta.env.VITE_EMAILJS_CUSTOMER_TEMPLATE_ID as string | undefined
-const INQUIRY_TEMPLATE = import.meta.env.VITE_EMAILJS_INQUIRY_TEMPLATE_ID as string | undefined
-
-/** True when email is configured, so a form can tell the visitor the truth. */
-export const emailConfigured = Boolean(SERVICE_ID && PUBLIC_KEY)
-
-export interface OrderEmail {
-  orderNumber: string
-  customerName: string
-  customerEmail: string
-  customerPhone: string
-  deliveryMethod: 'pickup' | 'delivery'
-  deliveryAddress: string | null
-  items: {
-    name: string
-    quantity: number
-    unit_price: number
-    /** What the customer typed, e.g. { name: 'Amani' }. Absent from the pre-migration function. */
-    personalisation?: Record<string, string> | null
-  }[]
-  subtotal: number
-  deliveryFee: number
-  total: number
-}
-
-async function send(templateId: string, params: Record<string, string>) {
-  const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      service_id: SERVICE_ID,
-      template_id: templateId,
-      user_id: PUBLIC_KEY,
-      template_params: params,
-    }),
-  })
-  if (!response.ok) {
-    throw new Error(`EmailJS ${response.status}: ${await response.text()}`)
-  }
-}
-
-export async function sendOrderEmails(order: OrderEmail): Promise<void> {
-  if (!SERVICE_ID || !PUBLIC_KEY) return
-
-  const params: Record<string, string> = {
-    order_number: order.orderNumber,
-    customer_name: order.customerName,
-    customer_email: order.customerEmail,
-    customer_phone: order.customerPhone,
-    delivery_method: order.deliveryMethod === 'delivery' ? 'Delivery' : 'Pickup',
-    delivery_address: order.deliveryAddress ?? 'Not given',
-    items: order.items
-      .map((i) => {
-        const line = `${i.quantity} × ${i.name} · ${formatRWF(i.unit_price * i.quantity)}`
-        const extra = Object.entries(i.personalisation ?? {})
-          .filter(([, v]) => v)
-          .map(([k, v]) => `    ${k}: ${v}`)
-        return [line, ...extra].join('\n')
-      })
-      .join('\n'),
-    subtotal: formatRWF(order.subtotal),
-    delivery_fee: order.deliveryFee ? formatRWF(order.deliveryFee) : 'Free',
-    total: formatRWF(order.total),
-    status_link: `${window.location.origin}/order-status?order=${order.orderNumber}`,
-    // Add {{payment_instructions}} to the customer email template to show this.
-    payment_instructions: momoInstructions(order.orderNumber, order.total),
-  }
-
-  const jobs: Promise<void>[] = []
-  if (ADMIN_TEMPLATE) jobs.push(send(ADMIN_TEMPLATE, params))
-  if (CUSTOMER_TEMPLATE) jobs.push(send(CUSTOMER_TEMPLATE, params))
-
-  const results = await Promise.allSettled(jobs)
-  for (const r of results) {
-    if (r.status === 'rejected') console.warn('Order email failed:', r.reason)
-  }
-}
+import { supabase } from '@/lib/supabase'
 
 export interface Inquiry {
   /** Where it came from, so you can tell a contact note from a quote request. */
@@ -103,32 +19,26 @@ export interface Inquiry {
   message: string
   /** Extra lines shown under the message, e.g. material and quantity. */
   details?: Record<string, string>
+  /** Link to an uploaded STL, if there is one. */
+  fileUrl?: string | null
 }
 
 /**
- * Sends a contact note or a custom quote request to the shop inbox.
- * Throws when it cannot send, so the form can show a fallback instead of
- * pretending the message arrived.
+ * Saves a contact note or quote request. Throws when it cannot be saved, so
+ * the form shows the WhatsApp route instead of pretending it arrived.
  */
 export async function sendInquiry(inquiry: Inquiry): Promise<void> {
-  if (!SERVICE_ID || !PUBLIC_KEY || !INQUIRY_TEMPLATE) {
-    throw new Error('Email is not configured yet.')
-  }
-
-  const extra = inquiry.details
-    ? Object.entries(inquiry.details)
-        .filter(([, v]) => v)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join('\n')
-    : ''
-
-  await send(INQUIRY_TEMPLATE, {
-    kind: inquiry.kind,
-    customer_name: inquiry.name,
-    customer_email: inquiry.email,
-    customer_phone: inquiry.phone ?? '',
-    message: inquiry.message,
-    details: extra,
-    page: typeof window === 'undefined' ? '' : window.location.href,
+  const details = Object.fromEntries(
+    Object.entries(inquiry.details ?? {}).filter(([, v]) => v)
+  )
+  const { error } = await supabase.rpc('submit_inquiry', {
+    p_kind: inquiry.kind,
+    p_name: inquiry.name,
+    p_email: inquiry.email,
+    p_phone: inquiry.phone ?? '',
+    p_message: inquiry.message,
+    p_details: details,
+    p_file_url: inquiry.fileUrl ?? null,
   })
+  if (error) throw new Error(error.message)
 }

@@ -50,7 +50,7 @@ const steps = [
 ]
 
 export function Home() {
-  usePageMeta('', 'The Safehouse is a Kigali 3D printing studio. Wall art, figurines, tealight modules and custom parts, printed to order.')
+  usePageMeta('', SITE.description)
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)

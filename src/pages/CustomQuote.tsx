@@ -84,8 +84,9 @@ export function CustomQuote() {
           Dimensions: dimensions,
           Quantity: quantity,
           Material: material,
-          Model: modelUrl ?? (file ? `${file.name} (upload failed, ask for it)` : 'None attached'),
+          Model: modelUrl ? 'Attached' : file ? `${file.name} (upload failed, ask for it)` : 'None attached',
         },
+        fileUrl: modelUrl,
       })
       setState('sent')
     } catch {

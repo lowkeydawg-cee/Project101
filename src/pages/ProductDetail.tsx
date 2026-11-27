@@ -128,11 +128,13 @@ export function ProductDetail() {
     setAdded(true)
   }
 
+  // The first picture opens the page (it shows straight away, even on a slow
+  // phone); the 3D model sits right after it.
   const slides: SlideItem[] = []
-  if (product.glbUrl) slides.push({ type: 'model', src: product.glbUrl })
   for (const url of product.gallery) {
     if (url?.startsWith('http')) slides.push({ type: 'image', src: url, alt: product.name })
   }
+  if (product.glbUrl) slides.splice(slides.length ? 1 : 0, 0, { type: 'model', src: product.glbUrl })
 
   const fallbackBackground =
     !product.image.startsWith('http') && product.image ? product.image : undefined

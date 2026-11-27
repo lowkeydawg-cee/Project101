@@ -56,8 +56,8 @@ export function Contact() {
                 Message sent
               </p>
               <p className="mt-3 text-sm leading-relaxed text-ink-dim">
-                It landed in the studio inbox. We usually reply within one working
-                day. If it is urgent, WhatsApp is faster.
+                It reached the studio. We usually reply within one working day.
+                If it is urgent, WhatsApp is faster.
               </p>
               <a
                 href={whatsappLink(draft)}

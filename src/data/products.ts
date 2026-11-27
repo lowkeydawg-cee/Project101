@@ -143,12 +143,13 @@ function mapRow(row: any): Product {
 }
 
 /**
- * True when the product's picture is a preview render, not a photo of a real
- * print. Preview renders live in public/products/preview. Upload a real photo
- * in the admin page and this turns false on its own, so the label disappears.
+ * True when the product's picture is a render, not a photo of a real print.
+ * Renders live in public/products/preview and public/products/v3. Upload a
+ * real photo in the admin page and this turns false on its own, so the
+ * "Preview render" label disappears for that picture.
  */
 export function isPreviewImage(image: string): boolean {
-  return image.includes('/products/preview/')
+  return image.includes('/products/preview/') || image.includes('/products/v3/')
 }
 
 /** True when the product has a real uploaded photo (not empty / placeholder). */

@@ -8,7 +8,7 @@ export function Footer() {
         <div>
           <p className="font-display text-xl uppercase text-ink">The Safehouse</p>
           <p className="mt-3 max-w-[24ch] text-sm text-ink-dim">
-            Kigali 3D fabrication studio. Catalog artifacts and one-off custom pieces.
+            3D printing studio in Kigali. Catalogue pieces and one-off custom work, printed to order.
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export function Footer() {
       <div className="border-t border-hairline px-6 py-5">
         <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-x-8 gap-y-2">
           <p className="font-mono-label text-[10px] uppercase text-ink-dim">
-            © {new Date().getFullYear()} The Safehouse. All artifacts fabricated in {SITE.city}.
+            © {new Date().getFullYear()} The Safehouse. Every piece printed in {SITE.city}.
           </p>
           {/* Said plainly, because a buyer deserves to know which pictures are
               of a real object and which are setting a mood. Product photos on
