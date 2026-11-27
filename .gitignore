@@ -29,3 +29,7 @@ dist-ssr
 
 # Raw Higgsfield generations and review files, never shipped
 review/
+
+# Factory build outputs (regenerate with: python factory/build.py <slug>)
+factory/__pycache__/
+factory/out/
