@@ -71,7 +71,9 @@ def parts_assembled():
     cab = loft(np.linspace(0.30, 0.86, 70), CAB_W, lambda t: 12.0, CAB_TOP, n_top=2.6, n_bot=6, taper=0.12, pinch=lambda t: 0.72)
     seat = Manifold.cube([200, 100, 40]).translate([-50, -50, SEAT_Z])
     canopy = cab ^ seat
-    prism = cab.slice(SEAT_Z).extrude(20).translate([0, 0, SEAT_Z])
+    # Cut the body along the canopy's full footprint (+0.15 mm clearance), not just its
+    # outline at seat height: the canopy bulges wider above the seat and would collide.
+    prism = canopy.project().offset(0.15, JoinType.Round).extrude(20).translate([0, 0, SEAT_Z])
     body = (body + (cab - seat)) - prism                                                    # flat seat for the canopy
     for x in (FX, RX): body = body - _arch(x)
     # details, all cut into the body (sharp edges, single colour)
@@ -100,7 +102,8 @@ def parts_assembled():
         for side in (-1, 1):
             tp = (CrossSection.square([WR - 5.0 - 1.0, WW - 2.0]).translate([5.0 + 0.5, -(WW - 2.0) / 2]).offset(1.0, JoinType.Round))
             tyre = tp.revolve(96)
-            web = Manifold.cylinder(1.2, 5.6, 5.6, 64).translate([0, 0, -WW / 2]) - Manifold.cylinder(4, AXLE_D / 2 + 0.05, AXLE_D / 2 + 0.05, 32).translate([0, 0, -WW])
+            # the axle hole must go right through the web (it used to stop halfway)
+            web = Manifold.cylinder(1.2, 5.6, 5.6, 64).translate([0, 0, -WW / 2]) - Manifold.cylinder(2 * WW, AXLE_D / 2 + 0.1, AXLE_D / 2 + 0.1, 32).translate([0, 0, -WW])
             tyre = (tyre + web)
             tread = None
             for k in range(36):
@@ -108,12 +111,13 @@ def parts_assembled():
                 g = Manifold.cube([1.0, 0.6, WW - 3.0]).translate([WR - 0.45, -0.3, -(WW - 3.0) / 2]).rotate([0, 0, a])
                 tread = g if tread is None else tread + g
             tyre = tyre - tread
-            disc = CrossSection.circle(5.0 - 0.1, 72)
+            disc = CrossSection.circle(4.5 + 0.05, 72)       # tyre bore is 4.5 mm: 0.05 mm press fit
             holes = CrossSection()
             for k in range(5):
                 a = 2 * np.pi * k / 5 + np.pi / 2
-                holes = holes + (CrossSection.circle(1.15, 32).translate([2.9 * np.cos(a), 2.9 * np.sin(a)]) +
-                                 CrossSection.circle(0.7, 24).translate([4.0 * np.cos(a), 4.0 * np.sin(a)])).hull()
+                # spoke windows stay inside the 4.55 mm rim, leaving a solid 0.5 mm grip ring
+                holes = holes + (CrossSection.circle(1.0, 32).translate([2.6 * np.cos(a), 2.6 * np.sin(a)]) +
+                                 CrossSection.circle(0.55, 24).translate([3.5 * np.cos(a), 3.5 * np.sin(a)])).hull()
             rim = (disc - holes - CrossSection.circle(AXLE_D / 2 - 0.05, 32)).extrude(2.2) + \
                   (CrossSection.circle(1.9, 32) - CrossSection.circle(AXLE_D / 2 - 0.05, 32)).extrude(3.0)
             rim = rim.translate([0, 0, WW / 2 - 2.6])

@@ -30,6 +30,10 @@ def build_stl(slug, out, overrides=None):
     for part, man in parts.items():
         mesh = man.to_mesh()
         t = trimesh.Trimesh(np.array(mesh.vert_properties)[:, :3], np.array(mesh.tri_verts), process=False)
+        # STL stores float32: drop the zero-area slivers that rounding leaves, so slicers
+        # see one clean watertight part instead of "49 objects, needs repair".
+        t.update_faces(t.nondegenerate_faces()); t.update_faces(t.unique_faces())
+        t.remove_unreferenced_vertices(); t.merge_vertices()
         t.export(os.path.join(d, f"{slug}_{part}.stl")); meshes[part] = t
     return meshes
 
